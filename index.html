@@ -19,7 +19,7 @@
 <meta name="twitter:card" content="summary">
     <meta http-equiv="Cache-control" content="no-cache">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <link rel="icon" href="/assets/favicon.ico">
+    <link rel="icon" href="/assets/favicon.jpg">
     <title>Li&#39;s Blog</title>
     <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
 /* This file is meant as a standalone workflow for
@@ -406,18 +406,24 @@
                 <main class="main index-page">
             
         <article class="index-post">
-            <a class="abstract-title" href="/2026/03/21/1/">
-                <span class="abstract-title-text">我爱你</span>
+            <a class="abstract-title" href="/2024/12/27/go_basics_summary_questions/">
+                <span class="abstract-title-text">Go基础总结问题</span>
             </a>
             <div class="abstract-content">
-                我爱你
+                1 go的数据类型基本数据类型bool、float、int 、字符、错误
+复合数据类型：ptr、array、slice、map、channel、interface、func（）
 
+2 UTF-8 和 Unicode3 如何高效地拼接字符串拼接字符串的方式有：+ fmt.Sprintf, strings.Builder, bytes.Buffer, strings.Join
+
+使用+操作符进行拼接时，会对字符串进 行遍历，计算并开辟一个新的空间来存储原来的两个字符串。
+fmt.Sprintf由于采用了接口参数，必须要用反射获取值，因此有性能损耗。
+strings.Builder用Write...
             </div>
             <!-- read more -->
             <div class="abstract-post-meta">
                 <!-- date -->
-                <div class="abstract-date" title="Last updated: 2026/03/21">
-                    <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2026/03/21</span>
+                <div class="abstract-date" title="Last updated: 2026/03/24">
+                    <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2024/12/27</span>
                 </div>
                 <!-- tags -->
             </div>
@@ -425,27 +431,233 @@
         <div class="index-post-divider"></div>
             
         <article class="index-post">
-            <a class="abstract-title" href="/2026/03/17/hello-world/">
-                <span class="abstract-title-text">Hello World</span>
+            <a class="abstract-title" href="/2024/12/26/redis/">
+                <span class="abstract-title-text">redis</span>
             </a>
             <div class="abstract-content">
-                Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hexo, you can find the answer in troubleshooting or you can ask me on GitHub.
-Quick StartCreate a new post1$ hexo new &quot;My New Post&quot;
+                1 redis 数据结构1.1 StringString 是最基本的 key-value 结构，key 是唯一标识，value 是具体的值，value 可以是整数、浮点数、字符串。
+内部实现：int 和 SDS
+字符串对象保存的是整数值，并且这个整数值可以用 long 类型来表示
+字符串对象保存的是一个字符串，并且这个字符申的长度小于等于 32 字节，用 embstr 编码
+字符串对象保存的是一个字符串，并且这个字符申的长度大于 32 字节，用 raw 编码
 
-More info: Writing
-Run server1$ hexo ...
+注意，embstr 编码和 raw 编码的边界在 redis 不同版本中是不一样的：
+
+redis 2.+ 版本：32 字节
+r...
             </div>
             <!-- read more -->
             <div class="abstract-post-meta">
                 <!-- date -->
-                <div class="abstract-date" title="Last updated: 2026/03/17">
-                    <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2026/03/17</span>
+                <div class="abstract-date" title="Last updated: 2026/03/24">
+                    <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2024/12/26</span>
+                </div>
+                <!-- tags -->
+            </div>
+        </article>
+        <div class="index-post-divider"></div>
+            
+        <article class="index-post">
+            <a class="abstract-title" href="/2024/12/25/mysql/">
+                <span class="abstract-title-text">Mysql</span>
+            </a>
+            <div class="abstract-content">
+                1 索引
+按「数据结构」分类： B+tree索引、Hash索引、Full-text索引。
+按「物理存储」分类：聚簇索引（主键索引）、二级索引（辅助索引）
+按「字段特性」分类： 主键索引、唯一索引、普通索引、前缀索引。
+按「字段个数」分类： 单列索引、联合索引。
+
+2 索引失效
+对索引使用做或者左右模糊匹配
+对索引使用函数
+对索引进行表达式计算
+对索引隐式类型转换：MySQL在遇到字符串和数字比较的时候，会自动把字符串转为数字，然后再进行比较。如果字符串是索引列，而条件语句中的输入参数是数字的话，那么索引列会发生隐式类型转换
+联合索引非最左匹配
+在 OR 前的条件列是索引列，而在 OR 后...
+            </div>
+            <!-- read more -->
+            <div class="abstract-post-meta">
+                <!-- date -->
+                <div class="abstract-date" title="Last updated: 2026/03/24">
+                    <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2024/12/25</span>
+                </div>
+                <!-- tags -->
+            </div>
+        </article>
+        <div class="index-post-divider"></div>
+            
+        <article class="index-post">
+            <a class="abstract-title" href="/2024/11/06/go_concurrency_collection/">
+                <span class="abstract-title-text">Go并发合集</span>
+            </a>
+            <div class="abstract-content">
+                Go并发1——Mutex及其进化史
+Go并发2——RWMutex
+Go并发3——WaitGroup
+Go并发4——Cond
+Go并发5——Once
+Go并发6——Map
+Go并发7——Pool
+Go并发8——Context
+Go并发9——atomic
+Go并发10—channel
+Go并发11—happens-before
+Go并发12——扩展并发原语
+
+            </div>
+            <!-- read more -->
+            <div class="abstract-post-meta">
+                <!-- date -->
+                <div class="abstract-date" title="Last updated: 2026/03/24">
+                    <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2024/11/06</span>
+                </div>
+                <!-- tags -->
+            </div>
+        </article>
+        <div class="index-post-divider"></div>
+            
+        <article class="index-post">
+            <a class="abstract-title" href="/2024/10/16/rabbitmq2-usage/">
+                <span class="abstract-title-text">RabbitMQ2——使用</span>
+            </a>
+            <div class="abstract-content">
+                怎么使用RabbitMQ？rabbitmqctl的简单使用接下来不会使用来宾用户 guest ，而是新添加一个用户xiaoli并将其添加到管理员，同时删除来宾用户，我们回到服务器或者虚拟机依次运行以下命令。
+123docker exec rabbitmq rabbitmqctl add_user xiaoli 123456docker exec rabbitmq rabbitmqctl set_user_tags xiaoli administratordocker exec rabbitmq rabbitmqctl delete_user guest
+
+
+接下来我们回到web页面并登录...
+            </div>
+            <!-- read more -->
+            <div class="abstract-post-meta">
+                <!-- date -->
+                <div class="abstract-date" title="Last updated: 2026/03/24">
+                    <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2024/10/16</span>
+                </div>
+                <!-- tags -->
+            </div>
+        </article>
+        <div class="index-post-divider"></div>
+            
+        <article class="index-post">
+            <a class="abstract-title" href="/2024/10/15/rabbitmq1-mq-introduction-and-installation/">
+                <span class="abstract-title-text">RabbitMQ1——MQ简介和安装</span>
+            </a>
+            <div class="abstract-content">
+                消息队列有什么作用？
+异步、解耦：通过使用消息队列将不同业务逻辑解耦,降低系统间耦合,提高系统的健壮性, 后续有其他的业务要使用订单数据可直接订阅消息队列, 提高系统的灵活性.
+削峰：类似秒杀（大秒）等场景下，某一时间可能会产生大量的请求，使用消息队列能够为后端处理请求提供一定的缓冲区，保证后端服务的稳定性。
+
+
+如上图我们正常请求，访问DB需要50ms，使用多线程的情况下，需要花40ms通知短信以及35ms通知邮件，传统模式下我们响应需要90ms，但使用消息队列后，我们只需要花费访问DB加上写入消息队列的时间即可。
+MQ选型特性ActiveMQRabbitMQKafkaRocketMQ...
+            </div>
+            <!-- read more -->
+            <div class="abstract-post-meta">
+                <!-- date -->
+                <div class="abstract-date" title="Last updated: 2026/03/24">
+                    <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2024/10/15</span>
+                </div>
+                <!-- tags -->
+            </div>
+        </article>
+        <div class="index-post-divider"></div>
+            
+        <article class="index-post">
+            <a class="abstract-title" href="/2024/10/10/go_sync_12_extended_concurrency_primitives/">
+                <span class="abstract-title-text">Go并发12——扩展并发原语</span>
+            </a>
+            <div class="abstract-content">
+                Semaphore保证持有的计数器在 0 到初始化的权重之间波动。
+
+每次获取的资源都会将信号量中的计数器减去对应的数值，在释放时重新加回来
+当遇到计数器大于信号量大小时，会进入休眠等待其他线程释放信号
+
+Go语言的扩展包中提供了带权重的信号量 semaphore.Weighted，我们可以按照不同的权重管理资源的访问，这种结构体暴露了 4 个方法：
+
+semaphore.NewWeighted —— 用于创建新的信号量
+semaphore.Weighted.Acquire —— 阻塞地获取指定权重的资源，如果当前没有空闲资源，会陷入休眠等待
+semaphore.Weighted.Try...
+            </div>
+            <!-- read more -->
+            <div class="abstract-post-meta">
+                <!-- date -->
+                <div class="abstract-date" title="Last updated: 2026/03/24">
+                    <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2024/10/10</span>
+                </div>
+                <!-- tags -->
+            </div>
+        </article>
+        <div class="index-post-divider"></div>
+            
+        <article class="index-post">
+            <a class="abstract-title" href="/2024/10/10/go_sync_11_happens_before/">
+                <span class="abstract-title-text">Go并发11—happens-before</span>
+            </a>
+            <div class="abstract-content">
+                12345678910111213var a, b intfunc f() &#123;	a = 1	b = 2&#125;func g() &#123;	print(b)	print(a)&#125;func main() &#123;	go f()	g()&#125;
+
+由于指令重排，代码并不一定会按照你写的顺序执行。比如上面这个例子，你可以运行尝试以下，并未输出 b=2，a=1 的结果。
+为什么会发生这种情况呢，我们声明了 ab 变量，默认是 0 值， go f() 启动了一个 goroutine，但 g 函数在 f 函数可能还没有完成赋值的情况下就被调用了，这可能导致 g 函数打...
+            </div>
+            <!-- read more -->
+            <div class="abstract-post-meta">
+                <!-- date -->
+                <div class="abstract-date" title="Last updated: 2026/03/24">
+                    <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2024/10/10</span>
+                </div>
+                <!-- tags -->
+            </div>
+        </article>
+        <div class="index-post-divider"></div>
+            
+        <article class="index-post">
+            <a class="abstract-title" href="/2024/09/30/go_sync_10_channel/">
+                <span class="abstract-title-text">Go并发10—channel</span>
+            </a>
+            <div class="abstract-content">
+                “不要通过共享内存来通信，而要通过通信来共享内存”。
+与主流语言通过共享内存来通信进行并发控制的方式不同， Go 语言的并发模型采用了 CSP 模式， goroutine  之间使用共享的 channel 进行通信，通过通信传递数据。
+使用引用类型，空值是nil。声明后的channel需要使用make函数初始化。
+声明1234// var 变量 chan 传递的数据类型var ch1 chan intvar ch2 chan boolvar ch3 chan []int
+
+初始化12345//make(chan 元素类型, 缓冲大小)var ch1 chan intch1 = make(...
+            </div>
+            <!-- read more -->
+            <div class="abstract-post-meta">
+                <!-- date -->
+                <div class="abstract-date" title="Last updated: 2026/03/24">
+                    <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2024/09/30</span>
+                </div>
+                <!-- tags -->
+            </div>
+        </article>
+        <div class="index-post-divider"></div>
+            
+        <article class="index-post">
+            <a class="abstract-title" href="/2024/09/27/go_sync_09_atomic/">
+                <span class="abstract-title-text">Go并发9——atomic</span>
+            </a>
+            <div class="abstract-content">
+                前面几个章节我们在源码中不少见到 atomic 原子操作的身影。接下来我们就掀开他的面纱。
+什么是原子操作？原子操作是指在计算机科学中 不可分割 的一系列操作。意味着这些操作要么全部执行完成，要么完全不执行；不会出现部分执行的情况。原子操作通常用于多线程编程环境，以确保数据的一致性和完整性。
+Go 语言的 sync/atomic 包提供的原子操作主要依赖于底层硬件的支持。现代CPU提供了特定的指令来执行原子操作，比如 CAS(Compare-And-Swap)、 XCHG(Exchange) 等，这些指令保证了在多核或多线程环境中对共享数据的操作是原子的，即不可分割的。
+使用使用场景不需...
+            </div>
+            <!-- read more -->
+            <div class="abstract-post-meta">
+                <!-- date -->
+                <div class="abstract-date" title="Last updated: 2026/03/24">
+                    <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2024/09/27</span>
                 </div>
                 <!-- tags -->
             </div>
         </article>
         <div class="index-post-divider"></div>
     <!-- paginator  -->
+        <nav class="page-nav">
+            <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><a class="extend next" rel="next" href="/page/2/">NEXT &gt;</a>
+        </nav>
 </main>
 
                 <!-- profile -->
@@ -498,25 +710,177 @@ Run server1$ hexo ...
     <!-- 在 ejs 中将 archive 按照时间排序 -->
         
         
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
     <div class="total-and-search">
         <div class="total-archive">
-        Total : 2
+        Total : 33
         </div>
         <!-- search  -->
     </div>
     <div class="post-archive">
-            <div class="archive-year"> Invalid date </div>
+            <div class="archive-year"> 2024 </div>
             <ul class="year-list">
         <li class="archive-post-item">
-            <span class="archive-post-date">Invalid date</span>
-            <a class="archive-post-title" href="/2026/03/21/1/">我爱你</a>
+            <span class="archive-post-date">12/27</span>
+            <a class="archive-post-title" href="/2024/12/27/go_basics_summary_questions/">Go基础总结问题</a>
         </li>
-                </ul>
-            <div class="archive-year"> Invalid date </div>
-            <ul class="year-list">
         <li class="archive-post-item">
-            <span class="archive-post-date">Invalid date</span>
-            <a class="archive-post-title" href="/2026/03/17/hello-world/">Hello World</a>
+            <span class="archive-post-date">12/26</span>
+            <a class="archive-post-title" href="/2024/12/26/redis/">redis</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/25</span>
+            <a class="archive-post-title" href="/2024/12/25/mysql/">Mysql</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/06</span>
+            <a class="archive-post-title" href="/2024/11/06/go_concurrency_collection/">Go并发合集</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/16</span>
+            <a class="archive-post-title" href="/2024/10/16/rabbitmq2-usage/">RabbitMQ2——使用</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/15</span>
+            <a class="archive-post-title" href="/2024/10/15/rabbitmq1-mq-introduction-and-installation/">RabbitMQ1——MQ简介和安装</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/10</span>
+            <a class="archive-post-title" href="/2024/10/10/go_sync_12_extended_concurrency_primitives/">Go并发12——扩展并发原语</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/10</span>
+            <a class="archive-post-title" href="/2024/10/10/go_sync_11_happens_before/">Go并发11—happens-before</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/30</span>
+            <a class="archive-post-title" href="/2024/09/30/go_sync_10_channel/">Go并发10—channel</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/27</span>
+            <a class="archive-post-title" href="/2024/09/27/go_sync_09_atomic/">Go并发9——atomic</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/24</span>
+            <a class="archive-post-title" href="/2024/09/24/go_sync_08_context/">Go并发8——Context</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/23</span>
+            <a class="archive-post-title" href="/2024/09/23/go_sync_07_pool/">Go并发7——Pool</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/21</span>
+            <a class="archive-post-title" href="/2024/09/21/go_sync_06_map/">Go并发6——Map</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/20</span>
+            <a class="archive-post-title" href="/2024/09/20/go_sync_05_once/">Go并发5——Once</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/19</span>
+            <a class="archive-post-title" href="/2024/09/19/go_sync_04_cond/">Go并发4——Cond</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/19</span>
+            <a class="archive-post-title" href="/2024/09/19/go_sync_03_waitgroup/">Go并发3——WaitGroup</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/17</span>
+            <a class="archive-post-title" href="/2024/09/17/go_sync_02_rwmutex/">Go并发2——RWMutex</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/16</span>
+            <a class="archive-post-title" href="/2024/09/16/go_sync_01_mutex_evolution/">Go并发1——Mutex及其进化史</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/15</span>
+            <a class="archive-post-title" href="/2024/09/15/docker_07_docker_networking/">Docker7——Docker网络</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/13</span>
+            <a class="archive-post-title" href="/2024/09/13/docker_06_dockerfile_and_instructions/">Docker6——Dockerfile及指令说明</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/13</span>
+            <a class="archive-post-title" href="/2024/09/13/go-map/">Go Map</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/12</span>
+            <a class="archive-post-title" href="/2024/09/12/docker_05_images/">Docker5——镜像</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/12</span>
+            <a class="archive-post-title" href="/2024/09/12/docker_04_deployment_trial/">Docker4——尝试部署</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/12</span>
+            <a class="archive-post-title" href="/2024/09/12/docker_02_installation_process/">Docker2——安装过程</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/12</span>
+            <a class="archive-post-title" href="/2024/09/12/docker_03_common_commands/">Docker3——Docker常用命令</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/07</span>
+            <a class="archive-post-title" href="/2024/09/07/go-zero/">go-zero</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/02</span>
+            <a class="archive-post-title" href="/2024/09/02/docker_01_virtualization_and_history/">Docker学习1——虚拟化及docker的发展史</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/22</span>
+            <a class="archive-post-title" href="/2024/08/22/understanding-mysql-transactions/">MySQL 事务详解</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/19</span>
+            <a class="archive-post-title" href="/2024/08/19/count_all_vs_count_column_differences/">COUNT(1)、COUNT(*)与COUNT(列名)区别？</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/19</span>
+            <a class="archive-post-title" href="/2024/08/19/mysql-like-query-optimization/">MySQL中like模糊查询如何优化？</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/19</span>
+            <a class="archive-post-title" href="/2024/08/19/mysql-why-index-use-b-plus-tree/">MySQL索引为什么是B+树？</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/17</span>
+            <a class="archive-post-title" href="/2024/08/17/how-is-a-SQL-query-executed/">基础架构：一条SQL查询语句是如何执行的？</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/16</span>
+            <a class="archive-post-title" href="/2024/08/16/go-arrays-and-slices/">Go 数组与切片</a>
         </li>
             </ul>
     </div>
@@ -524,6 +888,14 @@ Run server1$ hexo ...
 
         <div class="sidebar-panel-tags">
     <div class="sidebar-tags-name">
+            <span class="sidebar-tag-name" data-tags="docker">
+                <span class="iconfont-archer">&#xe606;</span>
+                docker
+            </span>
+            <span class="sidebar-tag-name" data-tags="mysql">
+                <span class="iconfont-archer">&#xe606;</span>
+                mysql
+            </span>
     </div>
     <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
     <div class="tag-load-fail" style="display: none; color: #ccc; font-size: 0.6rem;">

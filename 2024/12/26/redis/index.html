@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <!-- title -->
+<!-- keywords -->
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="author" content="Li">
+    <meta name="renderer" content="webkit">
+    <meta name="copyright" content="Li">
+        <meta name="keywords" content="hexo,hexo-theme,hexo-blog">
+    <meta name="description" content="">
+    <meta name="description" content="1 redis 数据结构1.1 StringString 是最基本的 key-value 结构，key 是唯一标识，value 是具体的值，value 可以是整数、浮点数、字符串。 内部实现：int 和 SDS 字符串对象保存的是整数值，并且这个整数值可以用 long 类型来表示 字符串对象保存的是一个字符串，并且这个字符申的长度小于等于 32 字节，用 embstr 编码 字符串对象保存的是一个">
+<meta property="og:type" content="article">
+<meta property="og:title" content="redis">
+<meta property="og:url" content="https://miracleman575.github.io/2024/12/26/redis/index.html">
+<meta property="og:site_name" content="code档案集">
+<meta property="og:description" content="1 redis 数据结构1.1 StringString 是最基本的 key-value 结构，key 是唯一标识，value 是具体的值，value 可以是整数、浮点数、字符串。 内部实现：int 和 SDS 字符串对象保存的是整数值，并且这个整数值可以用 long 类型来表示 字符串对象保存的是一个字符串，并且这个字符申的长度小于等于 32 字节，用 embstr 编码 字符串对象保存的是一个">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://miracleman575.github.io/2024/08/image3.png">
+<meta property="article:published_time" content="2024-12-25T16:49:00.000Z">
+<meta property="article:modified_time" content="2026-03-24T12:41:48.395Z">
+<meta property="article:author" content="Li">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://miracleman575.github.io/2024/08/image3.png">
+    <meta http-equiv="Cache-control" content="no-cache">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <link rel="icon" href="/assets/favicon.jpg">
+    <title>redis · Li&#39;s Blog</title>
+    <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
+/* This file is meant as a standalone workflow for
+- testing support for link[rel=preload]
+- enabling async CSS loading in browsers that do not support rel=preload
+- applying rel preload css once loaded, whether supported or not.
+*/ -->
+<script>
+    (function (w) {
+        'use strict'
+        // rel=preload support test
+        if (!w.loadCSS) {
+            w.loadCSS = function () {}
+        }
+        // define on the loadCSS obj
+        var rp = (loadCSS.relpreload = {})
+        // rel=preload feature support test
+        // runs once and returns a function for compat purposes
+        rp.support = (function () {
+            var ret
+            try {
+                ret = w.document.createElement('link').relList.supports('preload')
+            } catch (e) {
+                ret = false
+            }
+            return function () {
+                return ret
+            }
+        })()
+
+        // if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+        // then change that media back to its intended value on load
+        rp.bindMediaToggle = function (link) {
+            // remember existing media attr for ultimate state, or default to 'all'
+            var finalMedia = link.media || 'all'
+
+            function enableStylesheet() {
+                link.media = finalMedia
+            }
+
+            // bind load handlers to enable media
+            if (link.addEventListener) {
+                link.addEventListener('load', enableStylesheet)
+            } else if (link.attachEvent) {
+                link.attachEvent('onload', enableStylesheet)
+            }
+
+            // Set rel and non-applicable media type to start an async request
+            // note: timeout allows this to happen async to let rendering continue in IE
+            setTimeout(function () {
+                link.rel = 'stylesheet'
+                link.media = 'only x'
+            })
+            // also enable media after 3 seconds,
+            // which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+            setTimeout(enableStylesheet, 3000)
+        }
+
+        // loop through link elements in DOM
+        rp.poly = function () {
+            // double check this to prevent external calls from running
+            if (rp.support()) {
+                return
+            }
+            var links = w.document.getElementsByTagName('link')
+            for (var i = 0; i < links.length; i++) {
+                var link = links[i]
+                // qualify links to those with rel=preload and as=style attrs
+                if (
+                    link.rel === 'preload' &&
+                    link.getAttribute('as') === 'style' &&
+                    !link.getAttribute('data-loadcss')
+                ) {
+                    // prevent rerunning on link
+                    link.setAttribute('data-loadcss', true)
+                    // bind listeners to toggle media back
+                    rp.bindMediaToggle(link)
+                }
+            }
+        }
+
+        // if unsupported, run the polyfill
+        if (!rp.support()) {
+            // run once at least
+            rp.poly()
+
+            // rerun poly on an interval until onload
+            var run = w.setInterval(rp.poly, 500)
+            if (w.addEventListener) {
+                w.addEventListener('load', function () {
+                    rp.poly()
+                    w.clearInterval(run)
+                })
+            } else if (w.attachEvent) {
+                w.attachEvent('onload', function () {
+                    rp.poly()
+                    w.clearInterval(run)
+                })
+            }
+        }
+
+        // commonjs
+        if (typeof exports !== 'undefined') {
+            exports.loadCSS = loadCSS
+        } else {
+            w.loadCSS = loadCSS
+        }
+    })(typeof global !== 'undefined' ? global : this)
+</script>
+
+    <style type="text/css">
+    @font-face {
+        font-family: 'Oswald-Regular';
+        src: url("/font/Oswald-Regular.ttf");
+    }
+
+    body {
+        margin: 0;
+    }
+
+    header,
+    footer,
+    .footer-fixed-btn,
+    .sidebar,
+    .container,
+    .site-intro-meta,
+    .toc-wrapper {
+        display: none;
+    }
+
+    .site-intro {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        /* height: 50vh; */
+        overflow: hidden;
+    }
+
+    .site-intro-placeholder {
+        position: absolute;
+        z-index: -2;
+        top: 0;
+        left: 0;
+        width: calc(100% + 300px);
+        height: 100%;
+        background: repeating-linear-gradient(
+            -45deg,
+            #444 0,
+            #444 80px,
+            #333 80px,
+            #333 160px
+        );
+        background-position: center center;
+        transform: translate3d(-226px, 0, 0);
+        animation: gradient-move 2.5s ease-out 0s infinite;
+    }
+
+    @keyframes gradient-move {
+        0% {
+            transform: translate3d(-226px, 0, 0);
+        }
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+    }
+</style>
+
+    <link id="stylesheet-fancybox" rel="preload" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.36/dist/fancybox/fancybox.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link id="stylesheet-base" rel="preload" href="/css/style.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link id="stylesheet-mobile" rel="preload" href="/css/mobile.css" as="style" onload="this.onload=null;this.rel='stylesheet';this.media='screen and (max-width: 960px)'">
+    <link id="stylesheet-theme-dark" rel="preload" href="/css/dark.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" as="script">
+    <link rel="preload" href="/scripts/main.js" as="script">
+    <link rel="preload" href="/font/Oswald-Regular.ttf" as="font" crossorigin>
+    <link rel="preload" href="https://at.alicdn.com/t/font_327081_1dta1rlogw17zaor.woff" as="font" crossorigin>
+    <!-- algolia -->
+    <!-- 百度统计  -->
+    <!-- 谷歌统计  -->
+    <!-- Google tag (gtag.js) -->
+<meta name="generator" content="Hexo 8.1.1"></head>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script type="text/javascript">
+        if (typeof window.$ == undefined) {
+            console.warn('jquery load from jsdelivr failed, will load local script')
+            document.write('<script src="/lib/jquery.min.js" />')
+        }
+    </script>
+        <body class="post-body">
+        <!-- header -->
+        <header class="header header-mobile">
+    <!-- top read progress line -->
+    <div class="header-element">
+        <div class="read-progress"></div>
+    </div>
+    <!-- sidebar menu button -->
+    <div class="header-element">
+        <div class="header-sidebar-menu">
+            <div style="padding-left: 1px;">&#xe775;</div>
+        </div>
+    </div>
+    <!-- header actions -->
+    <div class="header-actions">
+        <!-- theme mode switch button -->
+        <span class="header-theme-btn header-element">
+            <i class="fas fa-adjust"></i>
+        </span>
+        <!-- back to home page text -->
+        <span class="home-link header-element">
+            <a href="/">Li's Blog</a>
+        </span>
+    </div>
+    <!-- toggle banner -->
+    <div class="banner">
+        <div class="blog-title header-element">
+            <a href="/">Li&#39;s Blog</a>
+        </div>
+        <div class="post-title header-element">
+            <a href="#" class="post-name">redis</a>
+        </div>
+    </div>
+</header>
+
+        <!-- fixed footer -->
+        <footer class="footer-fixed">
+    <!-- donate button -->
+
+    <!-- back to top button -->
+    <div class="footer-fixed-btn footer-fixed-btn--hidden back-top">
+        <div>&#xe639;</div>
+    </div>
+</footer>
+
+        <!-- wrapper -->
+        <div class="wrapper">
+            <div class="site-intro" style="    height:50vh;
+">
+    <!-- 主页  -->
+    <!-- 404页  -->
+    <div class="site-intro-placeholder"></div>
+    <div class="site-intro-img" style="background-image: url(/intro/post-bg.jpg)"></div>
+    <div class="site-intro-meta">
+        <!-- 标题  -->
+        <h1 class="intro-title">
+            <!-- 主页  -->
+                redis
+            <!-- 404 -->
+        </h1>
+        <!-- 副标题 -->
+        <p class="intro-subtitle">
+            <!-- 主页副标题  -->
+            <!-- 404 -->
+        </p>
+        <!-- 文章页 meta -->
+            <div class="post-intros">
+                <!-- 文章页标签  -->
+                    <div class="post-intro-tags" >
+</div>
+
+                <!-- 文章字数统计 -->
+                <div class="post-intro-meta">
+                    <!-- 撰写日期 -->
+                    <span class="iconfont-archer post-intro-calander">&#xe676;</span>
+                    <span class="post-intro-time">2024/12/26</span>
+                    <!-- busuanzi -->
+                        <span id="busuanzi_container_page_pv" class="busuanzi-pv">
+                            <span class="iconfont-archer post-intro-busuanzi">&#xe602;</span>
+                            <span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    <!-- 文章分享 -->
+                    <span class="share-wrapper">
+                        <span class="iconfont-archer share-icon">&#xe71d;</span>
+                        <span class="share-text">Share</span>
+                        <ul class="share-list">
+                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                                <div class="share-qrcode"></div>
+                            </li>
+                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
+    </div>
+</div>
+
+            <script>
+  // get user agent
+  function getBrowserVersions() {
+    var u = window.navigator.userAgent
+    return {
+      userAgent: u,
+      trident: u.indexOf('Trident') > -1, //IE内核
+      presto: u.indexOf('Presto') > -1, //opera内核
+      webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+      gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+      mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+      ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+      android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+      iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, //是否为iPhone或者安卓QQ浏览器
+      iPad: u.indexOf('iPad') > -1, //是否为iPad
+      webApp: u.indexOf('Safari') == -1, //是否为web应用程序，没有头部与底部
+      weixin: u.indexOf('MicroMessenger') == -1, //是否为微信浏览器
+      uc: u.indexOf('UCBrowser') > -1, //是否为android下的UC浏览器
+    }
+  }
+  var browser = {
+    versions: getBrowserVersions(),
+  }
+  console.log('userAgent: ' + browser.versions.userAgent)
+
+  // callback
+  function fontLoaded() {
+    console.log('font loaded')
+    if (document.getElementsByClassName('site-intro-meta')) {
+      document
+        .getElementsByClassName('intro-title')[0]
+        .classList.add('intro-fade-in')
+      document
+        .getElementsByClassName('intro-subtitle')[0]
+        .classList.add('intro-fade-in')
+      var postIntros = document.getElementsByClassName('post-intros')[0]
+      if (postIntros) {
+        postIntros.classList.add('post-fade-in')
+      }
+    }
+  }
+
+  // UC不支持跨域，所以直接显示
+  function asyncCb() {
+    if (browser.versions.uc) {
+      console.log('UCBrowser')
+      fontLoaded()
+    } else {
+      WebFont.load({
+        custom: {
+          families: ['Oswald-Regular'],
+        },
+        loading: function () {
+          // 所有字体开始加载
+          // console.log('font loading');
+        },
+        active: function () {
+          // 所有字体已渲染
+          fontLoaded()
+        },
+        inactive: function () {
+          // 字体预加载失败，无效字体或浏览器不支持加载
+          console.log('inactive: timeout')
+          fontLoaded()
+        },
+        timeout: 5000, // Set the timeout to two seconds
+      })
+    }
+  }
+
+  function asyncErr() {
+    console.warn('script load from CDN failed, will load local script')
+  }
+
+  // load webfont-loader async, and add callback function
+  function async(u, cb, err) {
+    var d = document,
+      t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0]
+    o.src = u
+    if (cb) {
+      o.addEventListener(
+        'load',
+        function (e) {
+          cb(null, e)
+        },
+        false
+      )
+    }
+    if (err) {
+      o.addEventListener(
+        'error',
+        function (e) {
+          err(null, e)
+        },
+        false
+      )
+    }
+    s.parentNode.insertBefore(o, s)
+  }
+
+  var asyncLoadWithFallBack = function (arr, success, reject) {
+    var currReject = function () {
+      reject()
+      arr.shift()
+      if (arr.length) async(arr[0], success, currReject)
+    }
+
+    async(arr[0], success, currReject)
+  }
+
+  asyncLoadWithFallBack(
+    [
+      'https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js',
+      'https://cdn.bootcss.com/webfont/1.6.28/webfontloader.js',
+      "/lib/webfontloader.min.js",
+    ],
+    asyncCb,
+    asyncErr
+  )
+</script>
+
+            <img class="loading" src="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" alt="loading">
+            <div class="container container-unloaded">
+                <main class="main post-page">
+    <article class="article-entry">
+        <h1 id="1-redis-数据结构"><a href="#1-redis-数据结构" class="headerlink" title="1 redis 数据结构"></a>1 redis 数据结构</h1><h2 id="1-1-String"><a href="#1-1-String" class="headerlink" title="1.1 String"></a>1.1 <strong>String</strong></h2><p>String 是最基本的 key-value 结构，key 是唯一标识，value 是具体的值，value 可以是整数、浮点数、字符串。</p>
+<h5 id="内部实现：int-和-SDS"><a href="#内部实现：int-和-SDS" class="headerlink" title="内部实现：int 和 SDS"></a>内部实现：int 和 SDS</h5><ul>
+<li>字符串对象保存的是整数值，并且这个整数值可以用 <code>long</code> 类型来表示</li>
+<li>字符串对象保存的是一个字符串，并且这个字符申的长度小于等于 32 字节，用 embstr 编码</li>
+<li>字符串对象保存的是一个字符串，并且这个字符申的长度大于 32 字节，用 raw 编码</li>
+</ul>
+<p>注意，embstr 编码和 raw 编码的边界在 redis 不同版本中是不一样的：</p>
+<ul>
+<li>redis 2.+ 版本：32 字节</li>
+<li>redis3.0-4.0：39 字节</li>
+<li>redis5.0：44 字节</li>
+<li>SDS 不仅可以保存文本数据，还可以保存二进制数据。</li>
+<li>SDS 获取字符串长度的时间复杂度是 O (1)</li>
+<li>Redis 的 SDS API 是安全的，拼接字符串不会造成缓冲区溢出</li>
+</ul>
+<h5 id="应用场景"><a href="#应用场景" class="headerlink" title="应用场景"></a>应用场景</h5><ul>
+<li>缓存对象：比如 json 等</li>
+<li>常规计数：比如计算访问次数、点赞、转发等</li>
+<li>分布式锁：NX 参数可以实现「key 不存在才插入」，可以用它来实现分布式锁</li>
+<li>共享 Session 信息：借助 Redis 对这些 Session 信息进行统一的存储和管理</li>
+</ul>
+<h2 id="1-2-List"><a href="#1-2-List" class="headerlink" title="1.2 List"></a>1.2 List</h2><p>List 列表是简单的字符串列表， <strong>按照插入顺序排序</strong>，可以从头部或尾部向 List 列表添加元素。</p>
+<h5 id="内部实现：-双向链表或压缩列表；-Redis-3-2-版本后统一为-quicklist"><a href="#内部实现：-双向链表或压缩列表；-Redis-3-2-版本后统一为-quicklist" class="headerlink" title="内部实现： 双向链表或压缩列表； Redis 3.2 版本后统一为 quicklist"></a>内部实现： <strong>双向链表或压缩列表</strong>； <strong>Redis 3.2 版本后统一为 quicklist</strong></h5><ul>
+<li>如果列表元素小于 512. 列表每个元素的值都小于 64 字节，redis 就会使用压缩列表</li>
+<li>不满足上述条件使用双向链表</li>
+</ul>
+<h5 id="应用场景-1"><a href="#应用场景-1" class="headerlink" title="应用场景"></a>应用场景</h5><ul>
+<li>消息队列：<ul>
+<li>消息保序：使用 LPUSH + RPOP;</li>
+<li>阻塞读取：使用 BRPOP;</li>
+<li>重复消息处理：生产者自行实现全局唯一 ID;</li>
+<li>消息的可靠性：使用 BRPOPLPUSH</li>
+</ul>
+</li>
+<li>排行榜</li>
+</ul>
+<h2 id="1-3-Hash"><a href="#1-3-Hash" class="headerlink" title="1.3 Hash"></a>1.3 Hash</h2><p>Hash 是一个键值对（key – value）集合，Hash 特别适合用于存储对象。</p>
+<h5 id="内部实现：-压缩列表或哈希表；Redis-7-0-交由-listpack"><a href="#内部实现：-压缩列表或哈希表；Redis-7-0-交由-listpack" class="headerlink" title="内部实现： 压缩列表或哈希表；Redis 7.0 交由 listpack"></a>内部实现： <strong>压缩列表或哈希表</strong>；Redis 7.0 交由 listpack</h5><ul>
+<li>如果哈希类型元素个数小于 <code>512</code> 个，所有值小于 <code>64</code> 字节，Redis 会使用 <strong>压缩列表</strong> 作为 Hash 类型的底层数据结构</li>
+<li>如果哈希类型元素不满足上面条件，Redis 会使用 <strong>哈希表</strong> 作为 Hash 类型的 底层数据结构</li>
+</ul>
+<h5 id="应用场景-2"><a href="#应用场景-2" class="headerlink" title="应用场景"></a>应用场景</h5><ul>
+<li><p>缓存对象：一般对象用 String + Json 存储，对象中某些频繁变化的属性可以考虑抽出来用 Hash 类型存储</p>
+</li>
+<li><p>购物车</p>
+</li>
+<li><p>添加商品： <code>HSET cart:{用户id} {商品id} 1</code></p>
+</li>
+<li><p>添加数量： <code>HINCRBY cart:{用户id} {商品id} 1</code></p>
+</li>
+<li><p>商品总数： <code>HLEN cart:{用户id}</code></p>
+</li>
+<li><p>删除商品： <code>HDEL cart:{用户id} {商品id}</code></p>
+</li>
+<li><p>获取购物车所有商品： <code>HGETALL cart:{用户id}</code></p>
+</li>
+</ul>
+<h2 id="1-4-Set"><a href="#1-4-Set" class="headerlink" title="1.4 Set"></a>1.4 Set</h2><p>Set 类型是一个无序并唯一的键值集合，它的存储顺序不会按照插入的先后顺序进行存储</p>
+<h5 id="内部实现：-哈希表或整数集合"><a href="#内部实现：-哈希表或整数集合" class="headerlink" title="内部实现： 哈希表或整数集合"></a>内部实现： <strong>哈希表或整数集合</strong></h5><ul>
+<li>如果集合中的元素都是整数且元素个数小于 <code>512</code> 个，Redis 会使用 <strong>整数集合</strong> 作为 Set 类型的底层数据结构</li>
+<li>如果集合中的元素不满足上面条件，则 Redis 使用 <strong>哈希表</strong> 作为 Set 类型的底层数据结构</li>
+</ul>
+<h5 id="应用场景-3"><a href="#应用场景-3" class="headerlink" title="应用场景"></a>应用场景</h5><ul>
+<li>点赞</li>
+<li>共同关注</li>
+<li>抽奖活动</li>
+</ul>
+<h2 id="1-5-ZSet"><a href="#1-5-ZSet" class="headerlink" title="1.5 ZSet"></a>1.5 ZSet</h2><p>Zset 类型（有序集合类型）相比于 Set 类型多了一个排序属性 score（分值）</p>
+<h5 id="内部实现：-压缩列表或跳表；-Redis-7-0-中-listpack"><a href="#内部实现：-压缩列表或跳表；-Redis-7-0-中-listpack" class="headerlink" title="内部实现： 压缩列表或跳表； Redis 7.0 中 listpack"></a>内部实现： <strong>压缩列表或跳表</strong>； <strong>Redis 7.0 中</strong> listpack</h5><ul>
+<li>如果有序集合的元素个数小于 <code>128</code> 个，并且每个元素的值小于 <code>64</code> 字节时，Redis 会使用 <strong>压缩列表</strong> 作为 Zset 类型的底层数据结构</li>
+<li>不满足上面的条件，Redis 会使用 <strong>跳表</strong> 作为 Zset 类型的底层数据结构</li>
+</ul>
+<h5 id="应用场景-4"><a href="#应用场景-4" class="headerlink" title="应用场景"></a>应用场景</h5><ul>
+<li>排行榜</li>
+<li>电话、姓名排序</li>
+</ul>
+<h2 id="1-6-BitMap"><a href="#1-6-BitMap" class="headerlink" title="1.6 BitMap"></a>1.6 BitMap</h2><p>Bitmap，即位图，是一串连续的二进制数组（0 和 1），可以通过偏移量（offset）定位元素</p>
+<h5 id="内部实现"><a href="#内部实现" class="headerlink" title="内部实现"></a>内部实现</h5><p>Bitmap 本身是用 String 类型作为底层数据结构实现的一种统计二值状态的数据类型</p>
+<p>String 类型是会保存为二进制的字节数组，Redis 就把字节数组的每个 bit 位利用起来</p>
+<h5 id="应用场景-5"><a href="#应用场景-5" class="headerlink" title="应用场景"></a>应用场景</h5><ul>
+<li>签到统计</li>
+<li>判断用户登陆态</li>
+<li>连续签到用户总数</li>
+</ul>
+<h2 id="1-7-HyperLogLog"><a href="#1-7-HyperLogLog" class="headerlink" title="1.7 HyperLogLog"></a>1.7 HyperLogLog</h2><p>一种用于「统计基数」的数据集合类型，基数统计就是指统计一个集合中不重复的元素个数，统计规则是基于概率完成的，不是非常准确。 <strong>每个 HyperLogLog 键只需要花费 12 KB 内存</strong> 就可以计算接近 2^64 个不同元素的基数。</p>
+<h5 id="内部实现-1"><a href="#内部实现-1" class="headerlink" title="内部实现"></a>内部实现</h5><h5 id="应用场景：百万级网页-UV-计数"><a href="#应用场景：百万级网页-UV-计数" class="headerlink" title="应用场景：百万级网页 UV 计数"></a>应用场景：百万级网页 UV 计数</h5><h2 id="1-8-GEO"><a href="#1-8-GEO" class="headerlink" title="1.8 GEO"></a>1.8 GEO</h2><p>用于存储地理位置信息，并对存储的信息进行操作</p>
+<h5 id="内部实现-2"><a href="#内部实现-2" class="headerlink" title="内部实现"></a>内部实现</h5><p>GEO 本身并没有设计新的底层数据结构，而是直接使用了 Sorted Set 集合类型</p>
+<p>GEO 类型使用 GeoHash 编码方法实现了经纬度到 Sorted Set 中元素权重分数的转换</p>
+<h5 id="应用场景：滴滴叫车"><a href="#应用场景：滴滴叫车" class="headerlink" title="应用场景：滴滴叫车"></a>应用场景：滴滴叫车</h5><h2 id="1-9stream"><a href="#1-9stream" class="headerlink" title="1.9stream"></a>1.9stream</h2><p>消息队列设计的数据类型</p>
+<h5 id="内部实现："><a href="#内部实现：" class="headerlink" title="内部实现："></a>内部实现：</h5><h5 id="应用场景-6"><a href="#应用场景-6" class="headerlink" title="应用场景"></a>应用场景</h5><ul>
+<li><p>消息队列</p>
+</li>
+<li><p>消息保序：XADD&#x2F;XREAD</p>
+</li>
+<li><p>阻塞读取：XREAD block</p>
+</li>
+<li><p>重复消息处理：Stream 在使用 XADD 命令，会自动生成全局唯一 ID；</p>
+</li>
+<li><p>消息可靠性：内部使用 PENDING List 自动保存消息，使用 XPENDING 命令查看消费组已经读取但是未被确认的消息，消费者使用 XACK 确认消息</p>
+</li>
+<li><p>支持消费组形式消费数据</p>
+</li>
+</ul>
+<h1 id="2-持久化方式"><a href="#2-持久化方式" class="headerlink" title="2 持久化方式"></a>2 持久化方式</h1><h3 id="2-1-RDB"><a href="#2-1-RDB" class="headerlink" title="2.1 RDB"></a>2.1 RDB</h3><p>每隔一段时间就将数据以二进制方式写入硬盘</p>
+<ul>
+<li><p>过程</p>
+</li>
+<li><p>1.主进程fork出子进程</p>
+</li>
+<li><p>2.子进程将共享内存文件写入临时RDB</p>
+</li>
+<li><p>3.写入完成后将原来的RDB文件替换同时子进程退出</p>
+</li>
+</ul>
+<p>若上述过程中，客服端有新增请求回在基于共享内存的内存副本中进行处理，即主进程每次接受一次IO都会通过COW将共享内存数据同步至内存副本，再在内存副本基础上处理新的操作</p>
+<ul>
+<li><p>优缺点</p>
+</li>
+<li><p>1.性能高，重启加载二进制</p>
+</li>
+<li><p>2.文件紧凑，二进制文件相对于AOF紧凑</p>
+</li>
+<li><p>3.可能丢数据，两次备份期间会丢数据</p>
+</li>
+</ul>
+<h3 id="2-2-AOF"><a href="#2-2-AOF" class="headerlink" title="2.2 AOF"></a>2.2 AOF</h3><p>每条写命令做日志追加写入日志文件，重启就回放</p>
+<ul>
+<li><p>过程：redis写AOF缓冲区再写入AOF日志文件；但是AOF缓冲区写入AOF日志有三种方式：</p>
+<ul>
+<li>1.实时同步：从缓冲区直接写入日志文件</li>
+<li>2.设置时间间隔：1s写一次</li>
+<li>3.由系统做主：可能出现RDB大范围丢失</li>
+</ul>
+</li>
+<li><p>日志重写：对AOF瘦身，a&#x3D;1，a&#x3D;2，a&#x3D;3 —-&gt; a&#x3D;3</p>
+</li>
+<li><p>优缺点</p>
+</li>
+<li><p>1.数据可靠，可以通过命令恢复</p>
+</li>
+<li><p>2.文件较大</p>
+</li>
+<li><p>3.恢复速度慢</p>
+</li>
+</ul>
+<h5 id="redis持久化方式是rdb和aof的融合体：-以-RDB-方式写入到-AOF-文件"><a href="#redis持久化方式是rdb和aof的融合体：-以-RDB-方式写入到-AOF-文件" class="headerlink" title="redis持久化方式是rdb和aof的融合体： 以 RDB 方式写入到 AOF 文件"></a>redis持久化方式是rdb和aof的融合体： <strong>以 RDB 方式写入到 AOF 文件</strong></h5><h1 id="3-redis的过期删除"><a href="#3-redis的过期删除" class="headerlink" title="3 redis的过期删除"></a>3 redis的过期删除</h1><h3 id="3-1-如何设置过期时间："><a href="#3-1-如何设置过期时间：" class="headerlink" title="3.1 如何设置过期时间："></a>3.1 如何设置过期时间：</h3><ul>
+<li>expire <key> <n>：设置 key 在 <strong>n</strong> <strong>秒后</strong> 过期</li>
+<li>pexpire <key> <n>：设置 key 在 <strong>n 毫秒后</strong> 过期</li>
+<li>expireat <key> <n>：设置 key 在 <strong>某个时间戳</strong>（精确到 <strong>秒</strong>）之后过期</li>
+<li>pexpireat <key> <n>：设置 key 在 <strong>某个时间戳</strong>（精确到 <strong>毫秒</strong>）之后过期</li>
+</ul>
+<h3 id="3-2-如何判断已经过期："><a href="#3-2-如何判断已经过期：" class="headerlink" title="3.2 如何判断已经过期："></a>3.2 如何判断已经过期：</h3><p>每当我们对一个 key 设置了过期时间时，Redis 会把该 key 带上过期时间存储到一个过期字典（hash），当我们查询一个 key 时，Redis 首先检查该 key 是否存在于过期字典中：</p>
+<ul>
+<li>如果不在，则正常读取键值</li>
+<li>如果存在，则会获取该 key 的过期时间，然后与当前系统时间进行比对</li>
+</ul>
+<h3 id="3-3-过期删除策略"><a href="#3-3-过期删除策略" class="headerlink" title="3.3 过期删除策略:"></a>3.3 过期删除策略:</h3><ul>
+<li><p>定时删除：在设置 key 的过期时间时，同时创建一个定时事件，当时间到达时，由事件处理器自动执行 key 的删除操作</p>
+<ul>
+<li>优点：内存友好，保证过期 key 会被尽快删除，也就是内存可以被尽快地释放</li>
+<li>缺点：CPU不友好，过期 key 比较多占用较多CPU时间</li>
+</ul>
+</li>
+<li><p>惰性删除：不主动删除过期键，每次从数据库访问 key 时，都检测 key 是否过期，如果过期则删除该 key</p>
+<ul>
+<li>优点：CPU友好，每次访问时，才会检查 key 是否过期</li>
+<li>缺点：内存不友好，过期 key 不会被直接删除，内存无法被尽快地释放</li>
+</ul>
+</li>
+<li><p>定期删除：每隔一段时间「随机」从数据库中取出一定数量的 key 进行检查，并删除其中的过期key</p>
+</li>
+<li><p>优点：限制删除操作执行的时长和频率，来减少删除操作对 CPU 的影响，同时也能删除一部分过期的数据减少了过期键对空间的无效占用</p>
+</li>
+<li><p>缺点：内存清理方面没有定时删除效果好，同时没有惰性删除使用的系统资源少。难以确定删除操作执行的时长和频率。</p>
+</li>
+</ul>
+<h3 id="3-4-Redis-过期删除策略"><a href="#3-4-Redis-过期删除策略" class="headerlink" title="3.4 Redis 过期删除策略"></a>3.4 Redis 过期删除策略</h3><p>惰性删除+定期删除</p>
+<ul>
+<li><p>惰性删除：Redis 在访问或者修改 key 之前，都会检查key是否过期</p>
+<ul>
+<li>如果过期，则删除该 key，至于选择异步删除，还是选择同步删除根据 lazyfree_lazy_expire参数配置决定，然后返回 null 客户端</li>
+<li>如果没有过期，不做任何处理，然后返回正常的键值对给客户端</li>
+</ul>
+</li>
+<li><p>定期删除：每隔一段时间「随机」从数据库中取出一定数量的 key 进行检查，并删除其中的过期key</p>
+</li>
+<li><p>默认每秒进行 10 次过期检查一次数据库</p>
+</li>
+<li><p>从过期字典中随机抽取 20 个 key；</p>
+</li>
+<li><p>检查这 20 个 key 是否过期，并删除已过期的 key</p>
+</li>
+<li><p>如果本轮检查的已过期 key 的数量，超过 5 个（20&#x2F;4），也就是「已过期 key 的数量」占比「随机抽取 key 的数量」大于 25%，则继续重复步骤 1；如果已过期的 key 比例小于 25%，则停止继续删除过期 key，然后等待下一轮再检查</p>
+</li>
+</ul>
+<h1 id="4-内存淘汰策略"><a href="#4-内存淘汰策略" class="headerlink" title="4 内存淘汰策略"></a>4 内存淘汰策略</h1><h3 id="4-1-如何设置-Redis-最大运行内存"><a href="#4-1-如何设置-Redis-最大运行内存" class="headerlink" title="4.1 如何设置 Redis 最大运行内存"></a>4.1 如何设置 Redis 最大运行内存</h3><p>redis.conf 中，可以通过参数 maxmemory <bytes></p>
+<h3 id="4-2-Redis-内存淘汰策略"><a href="#4-2-Redis-内存淘汰策略" class="headerlink" title="4.2 Redis 内存淘汰策略"></a>4.2 Redis 内存淘汰策略</h3><p>1、不进行数据淘汰的策略</p>
+<ul>
+<li><strong>noeviction：</strong> 它表示当运行内存超过最大设置内存时，不淘汰任何数据，这时如果有新的数据写入，会报错通知禁止写入，不淘汰任何数据，但是如果没用数据写入的话，只是单纯的查询或者删除操作的话，还是可以正常工作</li>
+</ul>
+<p>2、进行数据淘汰的策略</p>
+<ul>
+<li><p>设置过期时间的数据进行淘汰</p>
+<ul>
+<li>volatile-random：随机淘汰设置了过期时间的任意键值</li>
+<li>volatile-ttl：优先淘汰更早过期的键值。</li>
+<li>volatile-lru：3.0 之前，默认的内存淘汰策略，淘汰所有设置了过期时间的键值中，最久未使用的键值</li>
+<li>volatile-lfu：Redis 4.0 后新增的内存淘汰策略，淘汰所有设置了过期时间的键值中，最少使用的键值</li>
+</ul>
+</li>
+<li><p>所有数据范围内进行淘汰</p>
+</li>
+<li><p>allkeys-random：随机淘汰任意键值</p>
+</li>
+<li><p>allkeys-lru：淘汰整个键值中最久未使用的键值</p>
+</li>
+<li><p>allkeys-lfu：Redis 4.0 后新增的内存淘汰策略，淘汰整个键值中最少使用的键值</p>
+</li>
+</ul>
+<h3 id="4-3-LRU-算法和-LFU-算法有什么区别"><a href="#4-3-LRU-算法和-LFU-算法有什么区别" class="headerlink" title="4.3 LRU 算法和 LFU 算法有什么区别"></a>4.3 LRU 算法和 LFU 算法有什么区别</h3><ul>
+<li><p><strong>LRU最近最少使用：</strong> 会选择淘汰最近最少使用的数据</p>
+<ul>
+<li><strong>实现方式</strong>：是在 Redis 的对象结构体中添加一个额外的字段，用于记录此数据的最后一次访问时间（24 bits 的 lru 字段是用来记录 key 的访问时间戳）</li>
+<li><strong>内存淘汰：</strong> 随机采样的方式来淘汰数据，它是随机取 5 个值（此值可配置），然后淘汰最久没有使用的那个</li>
+<li><strong>优点</strong>：<ul>
+<li>不用为所有的数据维护一个大链表，节省了空间占用</li>
+<li>不用在每次数据访问时都移动链表项，提升了缓存的性能</li>
+</ul>
+</li>
+<li>缺点：无法解决缓存污染问题，比如应用一次读取了大量的数据，而这些数据只会被读取这一次，那么这些数据会留存在 Redis 缓存中很长一段时间，造成缓存污染</li>
+</ul>
+</li>
+<li><p><strong>LFU最近最不常用：</strong> 如果数据过去被访问多次，那么将来被访问的频率也更高</p>
+</li>
+<li><p>实现方式：相比于 LRU 算法的实现，多记录了「数据的访问频次」的信息（高 16bit 存储 ldt记录时间戳，低 8bit 存储 logc记录访问频次，初始为5）</p>
+</li>
+<li><p><strong>内存淘汰：l</strong> ogc 并不是单纯的访问次数，而是访问频次，logc 会随时间推移而衰减的，对 logc 做完衰减操作后，就开始对 logc 进行增加操作，增加操作并不是单纯的+1，而是根据概率增加，如果 logc 越大的 key，它的 logc 就越难再增加。</p>
+</li>
+<li><p>所以，Redis 在访问 key 时，对于 logc 是这样变化的:</p>
+</li>
+<li><p>1.先按照上次访问距离当前的时长，来对 logc 进行衰减,</p>
+</li>
+<li><p>2.然后，再按照一定概率增加 logc 的值</p>
+</li>
+</ul>
+<h1 id="5-缓存雪崩、击穿、穿透及解决方案"><a href="#5-缓存雪崩、击穿、穿透及解决方案" class="headerlink" title="5 缓存雪崩、击穿、穿透及解决方案"></a>5 缓存雪崩、击穿、穿透及解决方案</h1><p><img src="/2024/08/image3.png"></p>
+<h1 id="6-什么是主从、集群、哨兵。"><a href="#6-什么是主从、集群、哨兵。" class="headerlink" title="6 什么是主从、集群、哨兵。"></a>6 什么是主从、集群、哨兵。</h1>
+    </article>
+    <!-- license -->
+        <div class="license-wrapper">
+            <p>原文作者：<a href="https://miracleman575.github.io">Li</a>
+            <p>原文链接：<a href="https://miracleman575.github.io/2024/12/26/redis/">https://miracleman575.github.io/2024/12/26/redis/</a>
+            <p>发表日期：<a href="https://miracleman575.github.io/2024/12/26/redis/">December 26th 2024, 12:49:00 am</a>
+            <p>更新日期：<a href="https://miracleman575.github.io/2024/12/26/redis/">March 24th 2026, 8:41:48 pm</a>
+            <p>版权声明：本文采用<a rel="license noopener" target="_blank" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
+        </div>
+    <!-- paginator -->
+    <ul class="post-paginator">
+        <li class="next">
+                <div class="nextSlogan">Next Post</div>
+                <a href="/2024/12/27/go_basics_summary_questions/" title="Go基础总结问题">
+                    <div class="nextTitle">Go基础总结问题</div>
+                </a>
+        </li>
+        <li class="previous">
+                <div class="prevSlogan">Previous Post</div>
+                <a href="/2024/12/25/mysql/" title="Mysql">
+                    <div class="prevTitle">Mysql</div>
+                </a>
+        </li>
+    </ul>
+    <!-- comment -->
+        <div class="post-comment">
+            <!-- 来必力 City 版安装代码 -->
+
+            
+            
+            
+            <!-- utteranc评论 -->
+
+            <!-- partial('_partial/comment/changyan') -->
+            <!--PC版-->
+
+            
+            
+            
+        </div>
+    <!-- timeliness note -->
+    <!-- idea from: https://hexo.fluid-dev.com/posts/hexo-injector/#%E6%96%87%E7%AB%A0%E6%97%B6%E6%95%88%E6%80%A7%E6%8F%90%E7%A4%BA -->
+    <!-- Mathjax -->
+</main>
+
+                <!-- profile -->
+            </div>
+            <footer class="footer footer-unloaded">
+    <!-- social  -->
+        <div class="social">
+                            <a href="mailto:miraclemhome@foxmail.com" class="iconfont-archer email" title="email" ></a>
+
+        </div>
+    <!-- powered by Hexo  -->
+    <div class="copyright">
+        <span id="hexo-power">Powered by <a href="https://hexo.io/" target="_blank">Hexo</a></span><span class="iconfont-archer power">&#xe635;</span><span id="theme-info">theme <a href="https://github.com/fi3ework/hexo-theme-archer" target="_blank">Archer</a></span>
+    </div>
+    <!-- website approve for Chinese user -->
+    <!-- 不蒜子  -->
+        <div class="busuanzi-container">
+                <span id="busuanzi_container_site_pv">PV: <span id="busuanzi_value_site_pv"></span> :)</span>
+        </div>
+</footer>
+
+        </div>
+        <!-- toc -->
+            <div class="toc-wrapper toc-wrapper-loding" style=    top:50vh;
+>
+                <div class="toc-catalog">
+                    <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+                </div>
+                <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1-redis-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="toc-number">1.</span> <span class="toc-text">1 redis 数据结构</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-1-String"><span class="toc-number">1.1.</span> <span class="toc-text">1.1 String</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%86%85%E9%83%A8%E5%AE%9E%E7%8E%B0%EF%BC%9Aint-%E5%92%8C-SDS"><span class="toc-number">1.1.1.</span> <span class="toc-text">内部实现：int 和 SDS</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="toc-number">1.1.2.</span> <span class="toc-text">应用场景</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-2-List"><span class="toc-number">1.2.</span> <span class="toc-text">1.2 List</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%86%85%E9%83%A8%E5%AE%9E%E7%8E%B0%EF%BC%9A-%E5%8F%8C%E5%90%91%E9%93%BE%E8%A1%A8%E6%88%96%E5%8E%8B%E7%BC%A9%E5%88%97%E8%A1%A8%EF%BC%9B-Redis-3-2-%E7%89%88%E6%9C%AC%E5%90%8E%E7%BB%9F%E4%B8%80%E4%B8%BA-quicklist"><span class="toc-number">1.2.1.</span> <span class="toc-text">内部实现： 双向链表或压缩列表； Redis 3.2 版本后统一为 quicklist</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF-1"><span class="toc-number">1.2.2.</span> <span class="toc-text">应用场景</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-3-Hash"><span class="toc-number">1.3.</span> <span class="toc-text">1.3 Hash</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%86%85%E9%83%A8%E5%AE%9E%E7%8E%B0%EF%BC%9A-%E5%8E%8B%E7%BC%A9%E5%88%97%E8%A1%A8%E6%88%96%E5%93%88%E5%B8%8C%E8%A1%A8%EF%BC%9BRedis-7-0-%E4%BA%A4%E7%94%B1-listpack"><span class="toc-number">1.3.1.</span> <span class="toc-text">内部实现： 压缩列表或哈希表；Redis 7.0 交由 listpack</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF-2"><span class="toc-number">1.3.2.</span> <span class="toc-text">应用场景</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-4-Set"><span class="toc-number">1.4.</span> <span class="toc-text">1.4 Set</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%86%85%E9%83%A8%E5%AE%9E%E7%8E%B0%EF%BC%9A-%E5%93%88%E5%B8%8C%E8%A1%A8%E6%88%96%E6%95%B4%E6%95%B0%E9%9B%86%E5%90%88"><span class="toc-number">1.4.1.</span> <span class="toc-text">内部实现： 哈希表或整数集合</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF-3"><span class="toc-number">1.4.2.</span> <span class="toc-text">应用场景</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-5-ZSet"><span class="toc-number">1.5.</span> <span class="toc-text">1.5 ZSet</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%86%85%E9%83%A8%E5%AE%9E%E7%8E%B0%EF%BC%9A-%E5%8E%8B%E7%BC%A9%E5%88%97%E8%A1%A8%E6%88%96%E8%B7%B3%E8%A1%A8%EF%BC%9B-Redis-7-0-%E4%B8%AD-listpack"><span class="toc-number">1.5.1.</span> <span class="toc-text">内部实现： 压缩列表或跳表； Redis 7.0 中 listpack</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF-4"><span class="toc-number">1.5.2.</span> <span class="toc-text">应用场景</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-6-BitMap"><span class="toc-number">1.6.</span> <span class="toc-text">1.6 BitMap</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%86%85%E9%83%A8%E5%AE%9E%E7%8E%B0"><span class="toc-number">1.6.1.</span> <span class="toc-text">内部实现</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF-5"><span class="toc-number">1.6.2.</span> <span class="toc-text">应用场景</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-7-HyperLogLog"><span class="toc-number">1.7.</span> <span class="toc-text">1.7 HyperLogLog</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%86%85%E9%83%A8%E5%AE%9E%E7%8E%B0-1"><span class="toc-number">1.7.1.</span> <span class="toc-text">内部实现</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF%EF%BC%9A%E7%99%BE%E4%B8%87%E7%BA%A7%E7%BD%91%E9%A1%B5-UV-%E8%AE%A1%E6%95%B0"><span class="toc-number">1.7.2.</span> <span class="toc-text">应用场景：百万级网页 UV 计数</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-8-GEO"><span class="toc-number">1.8.</span> <span class="toc-text">1.8 GEO</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%86%85%E9%83%A8%E5%AE%9E%E7%8E%B0-2"><span class="toc-number">1.8.1.</span> <span class="toc-text">内部实现</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF%EF%BC%9A%E6%BB%B4%E6%BB%B4%E5%8F%AB%E8%BD%A6"><span class="toc-number">1.8.2.</span> <span class="toc-text">应用场景：滴滴叫车</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-9stream"><span class="toc-number">1.9.</span> <span class="toc-text">1.9stream</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%86%85%E9%83%A8%E5%AE%9E%E7%8E%B0%EF%BC%9A"><span class="toc-number">1.9.1.</span> <span class="toc-text">内部实现：</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF-6"><span class="toc-number">1.9.2.</span> <span class="toc-text">应用场景</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-%E6%8C%81%E4%B9%85%E5%8C%96%E6%96%B9%E5%BC%8F"><span class="toc-number">2.</span> <span class="toc-text">2 持久化方式</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-RDB"><span class="toc-number">2.1.</span> <span class="toc-text">2.1 RDB</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-AOF"><span class="toc-number">2.2.</span> <span class="toc-text">2.2 AOF</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#redis%E6%8C%81%E4%B9%85%E5%8C%96%E6%96%B9%E5%BC%8F%E6%98%AFrdb%E5%92%8Caof%E7%9A%84%E8%9E%8D%E5%90%88%E4%BD%93%EF%BC%9A-%E4%BB%A5-RDB-%E6%96%B9%E5%BC%8F%E5%86%99%E5%85%A5%E5%88%B0-AOF-%E6%96%87%E4%BB%B6"><span class="toc-number">2.2.1.</span> <span class="toc-text">redis持久化方式是rdb和aof的融合体： 以 RDB 方式写入到 AOF 文件</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-redis%E7%9A%84%E8%BF%87%E6%9C%9F%E5%88%A0%E9%99%A4"><span class="toc-number">3.</span> <span class="toc-text">3 redis的过期删除</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-%E5%A6%82%E4%BD%95%E8%AE%BE%E7%BD%AE%E8%BF%87%E6%9C%9F%E6%97%B6%E9%97%B4%EF%BC%9A"><span class="toc-number">3.1.</span> <span class="toc-text">3.1 如何设置过期时间：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-%E5%A6%82%E4%BD%95%E5%88%A4%E6%96%AD%E5%B7%B2%E7%BB%8F%E8%BF%87%E6%9C%9F%EF%BC%9A"><span class="toc-number">3.2.</span> <span class="toc-text">3.2 如何判断已经过期：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-%E8%BF%87%E6%9C%9F%E5%88%A0%E9%99%A4%E7%AD%96%E7%95%A5"><span class="toc-number">3.3.</span> <span class="toc-text">3.3 过期删除策略:</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-4-Redis-%E8%BF%87%E6%9C%9F%E5%88%A0%E9%99%A4%E7%AD%96%E7%95%A5"><span class="toc-number">3.4.</span> <span class="toc-text">3.4 Redis 过期删除策略</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#4-%E5%86%85%E5%AD%98%E6%B7%98%E6%B1%B0%E7%AD%96%E7%95%A5"><span class="toc-number">4.</span> <span class="toc-text">4 内存淘汰策略</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-1-%E5%A6%82%E4%BD%95%E8%AE%BE%E7%BD%AE-Redis-%E6%9C%80%E5%A4%A7%E8%BF%90%E8%A1%8C%E5%86%85%E5%AD%98"><span class="toc-number">4.1.</span> <span class="toc-text">4.1 如何设置 Redis 最大运行内存</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-Redis-%E5%86%85%E5%AD%98%E6%B7%98%E6%B1%B0%E7%AD%96%E7%95%A5"><span class="toc-number">4.2.</span> <span class="toc-text">4.2 Redis 内存淘汰策略</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-3-LRU-%E7%AE%97%E6%B3%95%E5%92%8C-LFU-%E7%AE%97%E6%B3%95%E6%9C%89%E4%BB%80%E4%B9%88%E5%8C%BA%E5%88%AB"><span class="toc-number">4.3.</span> <span class="toc-text">4.3 LRU 算法和 LFU 算法有什么区别</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#5-%E7%BC%93%E5%AD%98%E9%9B%AA%E5%B4%A9%E3%80%81%E5%87%BB%E7%A9%BF%E3%80%81%E7%A9%BF%E9%80%8F%E5%8F%8A%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88"><span class="toc-number">5.</span> <span class="toc-text">5 缓存雪崩、击穿、穿透及解决方案</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#6-%E4%BB%80%E4%B9%88%E6%98%AF%E4%B8%BB%E4%BB%8E%E3%80%81%E9%9B%86%E7%BE%A4%E3%80%81%E5%93%A8%E5%85%B5%E3%80%82"><span class="toc-number">6.</span> <span class="toc-text">6 什么是主从、集群、哨兵。</span></a></li></ol>
+            </div>
+        <!-- sidebar -->
+        <div class="sidebar sidebar-hide">
+    <ul class="sidebar-tabs sidebar-tabs-active-0">
+        <li class="sidebar-tab-archives"><span class="iconfont-archer">&#xe67d;</span><span class="tab-name">Archive</span></li>
+        <li class="sidebar-tab-tags"><span class="iconfont-archer">&#xe61b;</span><span class="tab-name">Tag</span></li>
+        <li class="sidebar-tab-categories"><span class="iconfont-archer">&#xe666;</span><span class="tab-name">Cate</span></li>
+    </ul>
+    <div class="sidebar-content sidebar-content-show-archive">
+        <div class="sidebar-panel-archives">
+    <!-- 在 ejs 中将 archive 按照时间排序 -->
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    <div class="total-and-search">
+        <div class="total-archive">
+        Total : 33
+        </div>
+        <!-- search  -->
+    </div>
+    <div class="post-archive">
+            <div class="archive-year"> 2024 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/27</span>
+            <a class="archive-post-title" href="/2024/12/27/go_basics_summary_questions/">Go基础总结问题</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/26</span>
+            <a class="archive-post-title" href="/2024/12/26/redis/">redis</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/25</span>
+            <a class="archive-post-title" href="/2024/12/25/mysql/">Mysql</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/06</span>
+            <a class="archive-post-title" href="/2024/11/06/go_concurrency_collection/">Go并发合集</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/16</span>
+            <a class="archive-post-title" href="/2024/10/16/rabbitmq2-usage/">RabbitMQ2——使用</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/15</span>
+            <a class="archive-post-title" href="/2024/10/15/rabbitmq1-mq-introduction-and-installation/">RabbitMQ1——MQ简介和安装</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/10</span>
+            <a class="archive-post-title" href="/2024/10/10/go_sync_12_extended_concurrency_primitives/">Go并发12——扩展并发原语</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/10</span>
+            <a class="archive-post-title" href="/2024/10/10/go_sync_11_happens_before/">Go并发11—happens-before</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/30</span>
+            <a class="archive-post-title" href="/2024/09/30/go_sync_10_channel/">Go并发10—channel</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/27</span>
+            <a class="archive-post-title" href="/2024/09/27/go_sync_09_atomic/">Go并发9——atomic</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/24</span>
+            <a class="archive-post-title" href="/2024/09/24/go_sync_08_context/">Go并发8——Context</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/23</span>
+            <a class="archive-post-title" href="/2024/09/23/go_sync_07_pool/">Go并发7——Pool</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/21</span>
+            <a class="archive-post-title" href="/2024/09/21/go_sync_06_map/">Go并发6——Map</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/20</span>
+            <a class="archive-post-title" href="/2024/09/20/go_sync_05_once/">Go并发5——Once</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/19</span>
+            <a class="archive-post-title" href="/2024/09/19/go_sync_04_cond/">Go并发4——Cond</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/19</span>
+            <a class="archive-post-title" href="/2024/09/19/go_sync_03_waitgroup/">Go并发3——WaitGroup</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/17</span>
+            <a class="archive-post-title" href="/2024/09/17/go_sync_02_rwmutex/">Go并发2——RWMutex</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/16</span>
+            <a class="archive-post-title" href="/2024/09/16/go_sync_01_mutex_evolution/">Go并发1——Mutex及其进化史</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/15</span>
+            <a class="archive-post-title" href="/2024/09/15/docker_07_docker_networking/">Docker7——Docker网络</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/13</span>
+            <a class="archive-post-title" href="/2024/09/13/docker_06_dockerfile_and_instructions/">Docker6——Dockerfile及指令说明</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/13</span>
+            <a class="archive-post-title" href="/2024/09/13/go-map/">Go Map</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/12</span>
+            <a class="archive-post-title" href="/2024/09/12/docker_05_images/">Docker5——镜像</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/12</span>
+            <a class="archive-post-title" href="/2024/09/12/docker_04_deployment_trial/">Docker4——尝试部署</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/12</span>
+            <a class="archive-post-title" href="/2024/09/12/docker_02_installation_process/">Docker2——安装过程</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/12</span>
+            <a class="archive-post-title" href="/2024/09/12/docker_03_common_commands/">Docker3——Docker常用命令</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/07</span>
+            <a class="archive-post-title" href="/2024/09/07/go-zero/">go-zero</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/02</span>
+            <a class="archive-post-title" href="/2024/09/02/docker_01_virtualization_and_history/">Docker学习1——虚拟化及docker的发展史</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/22</span>
+            <a class="archive-post-title" href="/2024/08/22/understanding-mysql-transactions/">MySQL 事务详解</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/19</span>
+            <a class="archive-post-title" href="/2024/08/19/count_all_vs_count_column_differences/">COUNT(1)、COUNT(*)与COUNT(列名)区别？</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/19</span>
+            <a class="archive-post-title" href="/2024/08/19/mysql-like-query-optimization/">MySQL中like模糊查询如何优化？</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/19</span>
+            <a class="archive-post-title" href="/2024/08/19/mysql-why-index-use-b-plus-tree/">MySQL索引为什么是B+树？</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/17</span>
+            <a class="archive-post-title" href="/2024/08/17/how-is-a-SQL-query-executed/">基础架构：一条SQL查询语句是如何执行的？</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/16</span>
+            <a class="archive-post-title" href="/2024/08/16/go-arrays-and-slices/">Go 数组与切片</a>
+        </li>
+            </ul>
+    </div>
+</div>
+
+        <div class="sidebar-panel-tags">
+    <div class="sidebar-tags-name">
+            <span class="sidebar-tag-name" data-tags="docker">
+                <span class="iconfont-archer">&#xe606;</span>
+                docker
+            </span>
+            <span class="sidebar-tag-name" data-tags="mysql">
+                <span class="iconfont-archer">&#xe606;</span>
+                mysql
+            </span>
+    </div>
+    <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
+    <div class="tag-load-fail" style="display: none; color: #ccc; font-size: 0.6rem;">
+        缺失模块，请参考主题文档进行安装配置：https://github.com/fi3ework/hexo-theme-archer#%E5%AE%89%E8%A3%85%E4%B8%BB%E9%A2%98
+    </div> 
+    <div class="sidebar-tags-list"></div>
+</div>
+
+        <div class="sidebar-panel-categories">
+    <div class="sidebar-categories-name">
+    </div>
+    <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
+    <div class="sidebar-categories-list"></div>
+</div>
+
+    </div>
+</div>
+
+        <!-- site-meta -->
+        <script>
+    var siteMetaRoot = "/"
+    if (siteMetaRoot === "undefined") {
+        siteMetaRoot = '/'
+    }
+    var siteMeta = {
+        url: "https://miracleman575.github.io",
+        root: siteMetaRoot,
+        author: "Li"
+    }
+</script>
+
+        <!-- import experimental options here -->
+        <!-- Custom Font -->
+
+        <!-- main func -->
+        <script src="/scripts/main.js"></script>
+        <!-- fancybox -->
+        <script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.36/dist/fancybox/fancybox.umd.js" onload="window.Fancybox.bind('[data-fancybox]')" defer></script>
+        <!-- algolia -->
+        <!-- busuanzi -->
+            <script src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+        <!-- async load share.js -->
+            <script src="/scripts/share.js" async></script>
+        <!-- mermaid -->
+    </body>
+</html>

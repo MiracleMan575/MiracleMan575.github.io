@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <!-- title -->
+<!-- keywords -->
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="author" content="Li">
+    <meta name="renderer" content="webkit">
+    <meta name="copyright" content="Li">
+        <meta name="keywords" content="hexo,hexo-theme,hexo-blog">
+    <meta name="description" content="">
+    <meta name="description" content="基础及操作key-value模式 1.声明123456789101112var hashMap map[keyType][valueType]var testMap map[string]stringtestMap &#x3D; make(map[string]string,10)&#x2F;&#x2F;直接makecites :&#x3D; make(map[string]string)&#x2F;&#x2F;直接赋值people :&#x3D; map[stri">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Go Map">
+<meta property="og:url" content="https://miracleman575.github.io/2024/09/13/go-map/index.html">
+<meta property="og:site_name" content="code档案集">
+<meta property="og:description" content="基础及操作key-value模式 1.声明123456789101112var hashMap map[keyType][valueType]var testMap map[string]stringtestMap &#x3D; make(map[string]string,10)&#x2F;&#x2F;直接makecites :&#x3D; make(map[string]string)&#x2F;&#x2F;直接赋值people :&#x3D; map[stri">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2024-09-13T05:03:47.000Z">
+<meta property="article:modified_time" content="2026-03-24T12:41:47.471Z">
+<meta property="article:author" content="Li">
+<meta name="twitter:card" content="summary">
+    <meta http-equiv="Cache-control" content="no-cache">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <link rel="icon" href="/assets/favicon.jpg">
+    <title>Go Map · Li&#39;s Blog</title>
+    <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
+/* This file is meant as a standalone workflow for
+- testing support for link[rel=preload]
+- enabling async CSS loading in browsers that do not support rel=preload
+- applying rel preload css once loaded, whether supported or not.
+*/ -->
+<script>
+    (function (w) {
+        'use strict'
+        // rel=preload support test
+        if (!w.loadCSS) {
+            w.loadCSS = function () {}
+        }
+        // define on the loadCSS obj
+        var rp = (loadCSS.relpreload = {})
+        // rel=preload feature support test
+        // runs once and returns a function for compat purposes
+        rp.support = (function () {
+            var ret
+            try {
+                ret = w.document.createElement('link').relList.supports('preload')
+            } catch (e) {
+                ret = false
+            }
+            return function () {
+                return ret
+            }
+        })()
+
+        // if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+        // then change that media back to its intended value on load
+        rp.bindMediaToggle = function (link) {
+            // remember existing media attr for ultimate state, or default to 'all'
+            var finalMedia = link.media || 'all'
+
+            function enableStylesheet() {
+                link.media = finalMedia
+            }
+
+            // bind load handlers to enable media
+            if (link.addEventListener) {
+                link.addEventListener('load', enableStylesheet)
+            } else if (link.attachEvent) {
+                link.attachEvent('onload', enableStylesheet)
+            }
+
+            // Set rel and non-applicable media type to start an async request
+            // note: timeout allows this to happen async to let rendering continue in IE
+            setTimeout(function () {
+                link.rel = 'stylesheet'
+                link.media = 'only x'
+            })
+            // also enable media after 3 seconds,
+            // which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+            setTimeout(enableStylesheet, 3000)
+        }
+
+        // loop through link elements in DOM
+        rp.poly = function () {
+            // double check this to prevent external calls from running
+            if (rp.support()) {
+                return
+            }
+            var links = w.document.getElementsByTagName('link')
+            for (var i = 0; i < links.length; i++) {
+                var link = links[i]
+                // qualify links to those with rel=preload and as=style attrs
+                if (
+                    link.rel === 'preload' &&
+                    link.getAttribute('as') === 'style' &&
+                    !link.getAttribute('data-loadcss')
+                ) {
+                    // prevent rerunning on link
+                    link.setAttribute('data-loadcss', true)
+                    // bind listeners to toggle media back
+                    rp.bindMediaToggle(link)
+                }
+            }
+        }
+
+        // if unsupported, run the polyfill
+        if (!rp.support()) {
+            // run once at least
+            rp.poly()
+
+            // rerun poly on an interval until onload
+            var run = w.setInterval(rp.poly, 500)
+            if (w.addEventListener) {
+                w.addEventListener('load', function () {
+                    rp.poly()
+                    w.clearInterval(run)
+                })
+            } else if (w.attachEvent) {
+                w.attachEvent('onload', function () {
+                    rp.poly()
+                    w.clearInterval(run)
+                })
+            }
+        }
+
+        // commonjs
+        if (typeof exports !== 'undefined') {
+            exports.loadCSS = loadCSS
+        } else {
+            w.loadCSS = loadCSS
+        }
+    })(typeof global !== 'undefined' ? global : this)
+</script>
+
+    <style type="text/css">
+    @font-face {
+        font-family: 'Oswald-Regular';
+        src: url("/font/Oswald-Regular.ttf");
+    }
+
+    body {
+        margin: 0;
+    }
+
+    header,
+    footer,
+    .footer-fixed-btn,
+    .sidebar,
+    .container,
+    .site-intro-meta,
+    .toc-wrapper {
+        display: none;
+    }
+
+    .site-intro {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        /* height: 50vh; */
+        overflow: hidden;
+    }
+
+    .site-intro-placeholder {
+        position: absolute;
+        z-index: -2;
+        top: 0;
+        left: 0;
+        width: calc(100% + 300px);
+        height: 100%;
+        background: repeating-linear-gradient(
+            -45deg,
+            #444 0,
+            #444 80px,
+            #333 80px,
+            #333 160px
+        );
+        background-position: center center;
+        transform: translate3d(-226px, 0, 0);
+        animation: gradient-move 2.5s ease-out 0s infinite;
+    }
+
+    @keyframes gradient-move {
+        0% {
+            transform: translate3d(-226px, 0, 0);
+        }
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+    }
+</style>
+
+    <link id="stylesheet-fancybox" rel="preload" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.36/dist/fancybox/fancybox.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link id="stylesheet-base" rel="preload" href="/css/style.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link id="stylesheet-mobile" rel="preload" href="/css/mobile.css" as="style" onload="this.onload=null;this.rel='stylesheet';this.media='screen and (max-width: 960px)'">
+    <link id="stylesheet-theme-dark" rel="preload" href="/css/dark.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" as="script">
+    <link rel="preload" href="/scripts/main.js" as="script">
+    <link rel="preload" href="/font/Oswald-Regular.ttf" as="font" crossorigin>
+    <link rel="preload" href="https://at.alicdn.com/t/font_327081_1dta1rlogw17zaor.woff" as="font" crossorigin>
+    <!-- algolia -->
+    <!-- 百度统计  -->
+    <!-- 谷歌统计  -->
+    <!-- Google tag (gtag.js) -->
+<meta name="generator" content="Hexo 8.1.1"></head>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script type="text/javascript">
+        if (typeof window.$ == undefined) {
+            console.warn('jquery load from jsdelivr failed, will load local script')
+            document.write('<script src="/lib/jquery.min.js" />')
+        }
+    </script>
+        <body class="post-body">
+        <!-- header -->
+        <header class="header header-mobile">
+    <!-- top read progress line -->
+    <div class="header-element">
+        <div class="read-progress"></div>
+    </div>
+    <!-- sidebar menu button -->
+    <div class="header-element">
+        <div class="header-sidebar-menu">
+            <div style="padding-left: 1px;">&#xe775;</div>
+        </div>
+    </div>
+    <!-- header actions -->
+    <div class="header-actions">
+        <!-- theme mode switch button -->
+        <span class="header-theme-btn header-element">
+            <i class="fas fa-adjust"></i>
+        </span>
+        <!-- back to home page text -->
+        <span class="home-link header-element">
+            <a href="/">Li's Blog</a>
+        </span>
+    </div>
+    <!-- toggle banner -->
+    <div class="banner">
+        <div class="blog-title header-element">
+            <a href="/">Li&#39;s Blog</a>
+        </div>
+        <div class="post-title header-element">
+            <a href="#" class="post-name">Go Map</a>
+        </div>
+    </div>
+</header>
+
+        <!-- fixed footer -->
+        <footer class="footer-fixed">
+    <!-- donate button -->
+
+    <!-- back to top button -->
+    <div class="footer-fixed-btn footer-fixed-btn--hidden back-top">
+        <div>&#xe639;</div>
+    </div>
+</footer>
+
+        <!-- wrapper -->
+        <div class="wrapper">
+            <div class="site-intro" style="    height:50vh;
+">
+    <!-- 主页  -->
+    <!-- 404页  -->
+    <div class="site-intro-placeholder"></div>
+    <div class="site-intro-img" style="background-image: url(/intro/post-bg.jpg)"></div>
+    <div class="site-intro-meta">
+        <!-- 标题  -->
+        <h1 class="intro-title">
+            <!-- 主页  -->
+                Go Map
+            <!-- 404 -->
+        </h1>
+        <!-- 副标题 -->
+        <p class="intro-subtitle">
+            <!-- 主页副标题  -->
+            <!-- 404 -->
+        </p>
+        <!-- 文章页 meta -->
+            <div class="post-intros">
+                <!-- 文章页标签  -->
+                    <div class="post-intro-tags" >
+</div>
+
+                <!-- 文章字数统计 -->
+                <div class="post-intro-meta">
+                    <!-- 撰写日期 -->
+                    <span class="iconfont-archer post-intro-calander">&#xe676;</span>
+                    <span class="post-intro-time">2024/09/13</span>
+                    <!-- busuanzi -->
+                        <span id="busuanzi_container_page_pv" class="busuanzi-pv">
+                            <span class="iconfont-archer post-intro-busuanzi">&#xe602;</span>
+                            <span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    <!-- 文章分享 -->
+                    <span class="share-wrapper">
+                        <span class="iconfont-archer share-icon">&#xe71d;</span>
+                        <span class="share-text">Share</span>
+                        <ul class="share-list">
+                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                                <div class="share-qrcode"></div>
+                            </li>
+                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
+    </div>
+</div>
+
+            <script>
+  // get user agent
+  function getBrowserVersions() {
+    var u = window.navigator.userAgent
+    return {
+      userAgent: u,
+      trident: u.indexOf('Trident') > -1, //IE内核
+      presto: u.indexOf('Presto') > -1, //opera内核
+      webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+      gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+      mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+      ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+      android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+      iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, //是否为iPhone或者安卓QQ浏览器
+      iPad: u.indexOf('iPad') > -1, //是否为iPad
+      webApp: u.indexOf('Safari') == -1, //是否为web应用程序，没有头部与底部
+      weixin: u.indexOf('MicroMessenger') == -1, //是否为微信浏览器
+      uc: u.indexOf('UCBrowser') > -1, //是否为android下的UC浏览器
+    }
+  }
+  var browser = {
+    versions: getBrowserVersions(),
+  }
+  console.log('userAgent: ' + browser.versions.userAgent)
+
+  // callback
+  function fontLoaded() {
+    console.log('font loaded')
+    if (document.getElementsByClassName('site-intro-meta')) {
+      document
+        .getElementsByClassName('intro-title')[0]
+        .classList.add('intro-fade-in')
+      document
+        .getElementsByClassName('intro-subtitle')[0]
+        .classList.add('intro-fade-in')
+      var postIntros = document.getElementsByClassName('post-intros')[0]
+      if (postIntros) {
+        postIntros.classList.add('post-fade-in')
+      }
+    }
+  }
+
+  // UC不支持跨域，所以直接显示
+  function asyncCb() {
+    if (browser.versions.uc) {
+      console.log('UCBrowser')
+      fontLoaded()
+    } else {
+      WebFont.load({
+        custom: {
+          families: ['Oswald-Regular'],
+        },
+        loading: function () {
+          // 所有字体开始加载
+          // console.log('font loading');
+        },
+        active: function () {
+          // 所有字体已渲染
+          fontLoaded()
+        },
+        inactive: function () {
+          // 字体预加载失败，无效字体或浏览器不支持加载
+          console.log('inactive: timeout')
+          fontLoaded()
+        },
+        timeout: 5000, // Set the timeout to two seconds
+      })
+    }
+  }
+
+  function asyncErr() {
+    console.warn('script load from CDN failed, will load local script')
+  }
+
+  // load webfont-loader async, and add callback function
+  function async(u, cb, err) {
+    var d = document,
+      t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0]
+    o.src = u
+    if (cb) {
+      o.addEventListener(
+        'load',
+        function (e) {
+          cb(null, e)
+        },
+        false
+      )
+    }
+    if (err) {
+      o.addEventListener(
+        'error',
+        function (e) {
+          err(null, e)
+        },
+        false
+      )
+    }
+    s.parentNode.insertBefore(o, s)
+  }
+
+  var asyncLoadWithFallBack = function (arr, success, reject) {
+    var currReject = function () {
+      reject()
+      arr.shift()
+      if (arr.length) async(arr[0], success, currReject)
+    }
+
+    async(arr[0], success, currReject)
+  }
+
+  asyncLoadWithFallBack(
+    [
+      'https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js',
+      'https://cdn.bootcss.com/webfont/1.6.28/webfontloader.js',
+      "/lib/webfontloader.min.js",
+    ],
+    asyncCb,
+    asyncErr
+  )
+</script>
+
+            <img class="loading" src="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" alt="loading">
+            <div class="container container-unloaded">
+                <main class="main post-page">
+    <article class="article-entry">
+        <h1 id="基础及操作"><a href="#基础及操作" class="headerlink" title="基础及操作"></a>基础及操作</h1><p>key-value模式</p>
+<h2 id="1-声明"><a href="#1-声明" class="headerlink" title="1.声明"></a>1.声明</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">var hashMap map[keyType][valueType]</span><br><span class="line">var testMap map[string]string</span><br><span class="line">testMap = make(map[string]string,10)</span><br><span class="line"></span><br><span class="line">//直接make</span><br><span class="line">cites := make(map[string]string)</span><br><span class="line"></span><br><span class="line">//直接赋值</span><br><span class="line">people := map[string]string&#123;</span><br><span class="line">    &quot;people1&quot;:&quot;haha&quot;,</span><br><span class="line">    &quot;people2&quot;:&quot;wawa&quot;,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="key的类型"><a href="#key的类型" class="headerlink" title="key的类型"></a>key的类型</h3><ul>
+<li>1.可以为bool，数字，string，指针，channel，还可以是包含上述类型的借口结构体数组，但通常是int、string；</li>
+<li>2.slice、map、function不能作为key，因为这几个无法使用&#x3D;&#x3D;判断</li>
+</ul>
+<h3 id="value的类型"><a href="#value的类型" class="headerlink" title="value的类型"></a>value的类型</h3><ul>
+<li>和key一样，通常是数字（浮点数、整数），string，struct，map</li>
+<li>声明不分配内存，需要make初始化才能赋值、使用</li>
+</ul>
+<h3 id="说明"><a href="#说明" class="headerlink" title="说明"></a>说明</h3><ul>
+<li>key不能重复；value可以</li>
+<li>map无序key value，不根据添加顺序，也不按照key排序</li>
+</ul>
+<h4 id="小练习"><a href="#小练习" class="headerlink" title="小练习"></a>小练习</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">students := make(map[string]map[string]string)</span><br><span class="line">students[&quot;1&quot;] = make(map[string]string,2)</span><br><span class="line">students[&quot;1&quot;][&quot;name&quot;] = &quot;tom&quot;</span><br><span class="line">students[&quot;1&quot;][&quot;sex&quot;] = &quot;nan&quot;</span><br><span class="line">students[&quot;2&quot;] = make(map[string]string,2)</span><br><span class="line">students[&quot;2&quot;][&quot;name&quot;] = &quot;mary&quot;</span><br><span class="line">students[&quot;2&quot;][&quot;sex&quot;] = &quot;nv&quot;</span><br></pre></td></tr></table></figure>
+
+<h2 id="2-map-操作"><a href="#2-map-操作" class="headerlink" title="2.map 操作"></a>2.map 操作</h2><h3 id="增和改-map-key-value"><a href="#增和改-map-key-value" class="headerlink" title="增和改 map[key]=value"></a>增和改 <code>map[key]=value</code></h3><h3 id="删除-delete-map-key"><a href="#删除-delete-map-key" class="headerlink" title="删除 delete(map,&quot;key&quot;)"></a>删除 <code>delete(map,&quot;key&quot;)</code></h3><p>存在key删除，无也不报错；若想全部删除就遍历删除，或者make一个新空间，让gc处理</p>
+<h3 id="查找"><a href="#查找" class="headerlink" title="查找"></a>查找</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">value,findRes = people[&quot;1&quot;]</span><br><span class="line">if findRes&#123;</span><br><span class="line">    return value</span><br><span class="line">&#125;else&#123;</span><br><span class="line">    return &quot;cant find it&quot;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="遍历（只有for-range）"><a href="#遍历（只有for-range）" class="headerlink" title="遍历（只有for range）"></a>遍历（只有for range）</h3><p><strong>不可用for循环：map无序即无下标</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">for k,v := range maps&#123;</span><br><span class="line">    fmt.Printf(&quot;k=%v,v=%v&quot;,k,v)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>获取长度 len() <code>len(map)</code></li>
+<li>按key排序<ul>
+<li>1.将map的key放入切片中</li>
+<li>2.对切片排序</li>
+<li>3.遍历切片，按照key输出值</li>
+</ul>
+</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">intSort := make(map[int]int,4)</span><br><span class="line">intSort[10] = 20</span><br><span class="line">intSort[110] = 1</span><br><span class="line">intSort[40] = 5</span><br><span class="line">intSort[90] = 2</span><br><span class="line"></span><br><span class="line">var keys []int</span><br><span class="line">for k,_ := range intSort&#123;</span><br><span class="line">    keys = append(keys,k)</span><br><span class="line">&#125;</span><br><span class="line">sort.Ints(keys)</span><br><span class="line">for _,k := range keys&#123;</span><br><span class="line">    fmt.Printf(&quot;map[%v]=%v&quot;,k,intSort[k])</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="3-map切片"><a href="#3-map切片" class="headerlink" title="3 map切片"></a>3 map切片</h2><p>此处创建了map切片，还有新增map的append</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">monster := make([]map[string]string,1)</span><br><span class="line"></span><br><span class="line">if monster[0] == nil&#123;</span><br><span class="line">    monster[0] = make(map[string]string,2)</span><br><span class="line">    monster[0][&quot;name&quot;] = &quot;吴亦凡&quot;</span><br><span class="line">    monster[0][&quot;age&quot;] = &quot;30&quot;</span><br><span class="line">&#125;</span><br><span class="line">monsterNew := map[string]string&#123;</span><br><span class="line">    &quot;name&quot;:&quot;a&quot;,</span><br><span class="line">    &quot;age&quot;:&quot;20&quot;,</span><br><span class="line">&#125;</span><br><span class="line">monster = append(monster,monsterNew)</span><br></pre></td></tr></table></figure>
+
+<h2 id="使用细节"><a href="#使用细节" class="headerlink" title="使用细节"></a>使用细节</h2><ul>
+<li>1.引用类型，故函数中会改变其值</li>
+<li>2.map可以动态增长键值对，即自动扩容</li>
+<li>3.map的value更适合管理struct</li>
+</ul>
+<h1 id="高级"><a href="#高级" class="headerlink" title="高级"></a>高级</h1><h2 id="1-数据结构"><a href="#1-数据结构" class="headerlink" title="1 数据结构"></a>1 数据结构</h2><p>map 又称为 hash map，在算法上基于 hash 实现 key 的映射和寻址；在数据结构上基于桶数组实现 key-value 对的存储。</p>
+<p>以一组 key-value 对写入 map 的流程为例进行简述：</p>
+<p>（1）通过哈希方法取得 key 的 hash 值；</p>
+<p>（2）hash 值对桶数组长度取模，确定其所属的桶；</p>
+<p>（3）在桶中插入 key-value 对。</p>
+<h3 id="1-1-hmap"><a href="#1-1-hmap" class="headerlink" title="1.1 hmap"></a>1.1 hmap</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">type hmap struct &#123;</span><br><span class="line">    count     int</span><br><span class="line">    flags     uint8</span><br><span class="line">    B         uint8</span><br><span class="line">    noverflow uint16</span><br><span class="line">    hash0     uint32</span><br><span class="line">    buckets    unsafe.Pointer</span><br><span class="line">    oldbuckets unsafe.Pointer</span><br><span class="line">    nevacuate  uintptr</span><br><span class="line">    extra *mapextra</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>count：map 中的 key-value 总数；</li>
+<li>flags：map 状态标识，可以标识出 map 是否被 goroutine 并发读写；</li>
+<li>B：桶数组长度的指数，桶数组长度为 2^B；</li>
+<li>noverflow：map 中溢出桶的数量；</li>
+<li>hash0：hash 随机因子，生成 key 的 hash 值时会使用到；</li>
+<li>buckets：桶数组；</li>
+<li>oldbuckets：扩容过程中老的桶数组；</li>
+<li>nevacuate：扩容时的进度标识，index 小于 nevacuate 的桶都已经由老桶转移到新桶中；</li>
+<li>extra：预申请的溢出桶.</li>
+</ul>
+<h3 id="1-2-mapextra"><a href="#1-2-mapextra" class="headerlink" title="1.2 mapextra"></a>1.2 mapextra</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">type mapextra struct &#123;</span><br><span class="line">    overflow    *[]*bmap</span><br><span class="line">    oldoverflow *[]*bmap</span><br><span class="line">    nextOverflow *bmap</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在 map 初始化时，倘若容量过大，会提前申请好一批溢出桶，以供后续使用，这部分溢出桶存放在 hmap.mapextra 当中：</p>
+<ul>
+<li>mapextra.overflow：供桶数组 buckets 使用的溢出桶；</li>
+<li>mapextra.oldoverFlow: 扩容流程中，供老桶数组 oldBuckets 使用的溢出桶；</li>
+<li>mapextra.nextOverflow：下一个可用的溢出桶.</li>
+</ul>
+<h3 id="1-3-bmap"><a href="#1-3-bmap" class="headerlink" title="1.3 bmap"></a>1.3 bmap</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">const bucketCnt = 8</span><br><span class="line">type bmap struct &#123;</span><br><span class="line">    tophash [bucketCnt]uint8</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>bmap 就是 map 中的桶，可以存储 8 组 key-value 对的数据，以及一个指向下一个溢出桶的指针；</li>
+<li>每组 key-value 对数据包含 key 高 8 位 hash 值 tophash，key 和 val 三部分；</li>
+<li>在代码层面只展示了 tophash 部分，但由于 tophash、key 和 val 的数据长度固定，因此可以通过内存地址偏移的方式寻找到后续的 key 数组、val 数组以及溢出桶指针；</li>
+<li>为方便理解，把完整的 bmap 类声明代码补充如下：</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">type bmap struct &#123;</span><br><span class="line">    tophash [bucketCnt]uint8</span><br><span class="line">    keys [bucketCnt]T</span><br><span class="line">    values [bucketCnt]T</span><br><span class="line">    overflow uint8</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+    </article>
+    <!-- license -->
+        <div class="license-wrapper">
+            <p>原文作者：<a href="https://miracleman575.github.io">Li</a>
+            <p>原文链接：<a href="https://miracleman575.github.io/2024/09/13/go-map/">https://miracleman575.github.io/2024/09/13/go-map/</a>
+            <p>发表日期：<a href="https://miracleman575.github.io/2024/09/13/go-map/">September 13th 2024, 1:03:47 pm</a>
+            <p>更新日期：<a href="https://miracleman575.github.io/2024/09/13/go-map/">March 24th 2026, 8:41:47 pm</a>
+            <p>版权声明：本文采用<a rel="license noopener" target="_blank" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
+        </div>
+    <!-- paginator -->
+    <ul class="post-paginator">
+        <li class="next">
+                <div class="nextSlogan">Next Post</div>
+                <a href="/2024/09/13/docker_06_dockerfile_and_instructions/" title="Docker6——Dockerfile及指令说明">
+                    <div class="nextTitle">Docker6——Dockerfile及指令说明</div>
+                </a>
+        </li>
+        <li class="previous">
+                <div class="prevSlogan">Previous Post</div>
+                <a href="/2024/09/12/docker_05_images/" title="Docker5——镜像">
+                    <div class="prevTitle">Docker5——镜像</div>
+                </a>
+        </li>
+    </ul>
+    <!-- comment -->
+        <div class="post-comment">
+            <!-- 来必力 City 版安装代码 -->
+
+            
+            
+            
+            <!-- utteranc评论 -->
+
+            <!-- partial('_partial/comment/changyan') -->
+            <!--PC版-->
+
+            
+            
+            
+        </div>
+    <!-- timeliness note -->
+    <!-- idea from: https://hexo.fluid-dev.com/posts/hexo-injector/#%E6%96%87%E7%AB%A0%E6%97%B6%E6%95%88%E6%80%A7%E6%8F%90%E7%A4%BA -->
+    <!-- Mathjax -->
+</main>
+
+                <!-- profile -->
+            </div>
+            <footer class="footer footer-unloaded">
+    <!-- social  -->
+        <div class="social">
+                            <a href="mailto:miraclemhome@foxmail.com" class="iconfont-archer email" title="email" ></a>
+
+        </div>
+    <!-- powered by Hexo  -->
+    <div class="copyright">
+        <span id="hexo-power">Powered by <a href="https://hexo.io/" target="_blank">Hexo</a></span><span class="iconfont-archer power">&#xe635;</span><span id="theme-info">theme <a href="https://github.com/fi3ework/hexo-theme-archer" target="_blank">Archer</a></span>
+    </div>
+    <!-- website approve for Chinese user -->
+    <!-- 不蒜子  -->
+        <div class="busuanzi-container">
+                <span id="busuanzi_container_site_pv">PV: <span id="busuanzi_value_site_pv"></span> :)</span>
+        </div>
+</footer>
+
+        </div>
+        <!-- toc -->
+            <div class="toc-wrapper toc-wrapper-loding" style=    top:50vh;
+>
+                <div class="toc-catalog">
+                    <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+                </div>
+                <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%9F%BA%E7%A1%80%E5%8F%8A%E6%93%8D%E4%BD%9C"><span class="toc-number">1.</span> <span class="toc-text">基础及操作</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E5%A3%B0%E6%98%8E"><span class="toc-number">1.1.</span> <span class="toc-text">1.声明</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#key%E7%9A%84%E7%B1%BB%E5%9E%8B"><span class="toc-number">1.1.1.</span> <span class="toc-text">key的类型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#value%E7%9A%84%E7%B1%BB%E5%9E%8B"><span class="toc-number">1.1.2.</span> <span class="toc-text">value的类型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AF%B4%E6%98%8E"><span class="toc-number">1.1.3.</span> <span class="toc-text">说明</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%B0%8F%E7%BB%83%E4%B9%A0"><span class="toc-number">1.1.3.1.</span> <span class="toc-text">小练习</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-map-%E6%93%8D%E4%BD%9C"><span class="toc-number">1.2.</span> <span class="toc-text">2.map 操作</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A2%9E%E5%92%8C%E6%94%B9-map-key-value"><span class="toc-number">1.2.1.</span> <span class="toc-text">增和改 map[key]&#x3D;value</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%A0%E9%99%A4-delete-map-key"><span class="toc-number">1.2.2.</span> <span class="toc-text">删除 delete(map,&quot;key&quot;)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9F%A5%E6%89%BE"><span class="toc-number">1.2.3.</span> <span class="toc-text">查找</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%81%8D%E5%8E%86%EF%BC%88%E5%8F%AA%E6%9C%89for-range%EF%BC%89"><span class="toc-number">1.2.4.</span> <span class="toc-text">遍历（只有for range）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-map%E5%88%87%E7%89%87"><span class="toc-number">1.3.</span> <span class="toc-text">3 map切片</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8%E7%BB%86%E8%8A%82"><span class="toc-number">1.4.</span> <span class="toc-text">使用细节</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E9%AB%98%E7%BA%A7"><span class="toc-number">2.</span> <span class="toc-text">高级</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="toc-number">2.1.</span> <span class="toc-text">1 数据结构</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-hmap"><span class="toc-number">2.1.1.</span> <span class="toc-text">1.1 hmap</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-mapextra"><span class="toc-number">2.1.2.</span> <span class="toc-text">1.2 mapextra</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-3-bmap"><span class="toc-number">2.1.3.</span> <span class="toc-text">1.3 bmap</span></a></li></ol></li></ol></li></ol>
+            </div>
+        <!-- sidebar -->
+        <div class="sidebar sidebar-hide">
+    <ul class="sidebar-tabs sidebar-tabs-active-0">
+        <li class="sidebar-tab-archives"><span class="iconfont-archer">&#xe67d;</span><span class="tab-name">Archive</span></li>
+        <li class="sidebar-tab-tags"><span class="iconfont-archer">&#xe61b;</span><span class="tab-name">Tag</span></li>
+        <li class="sidebar-tab-categories"><span class="iconfont-archer">&#xe666;</span><span class="tab-name">Cate</span></li>
+    </ul>
+    <div class="sidebar-content sidebar-content-show-archive">
+        <div class="sidebar-panel-archives">
+    <!-- 在 ejs 中将 archive 按照时间排序 -->
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    <div class="total-and-search">
+        <div class="total-archive">
+        Total : 33
+        </div>
+        <!-- search  -->
+    </div>
+    <div class="post-archive">
+            <div class="archive-year"> 2024 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/27</span>
+            <a class="archive-post-title" href="/2024/12/27/go_basics_summary_questions/">Go基础总结问题</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/26</span>
+            <a class="archive-post-title" href="/2024/12/26/redis/">redis</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/25</span>
+            <a class="archive-post-title" href="/2024/12/25/mysql/">Mysql</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/06</span>
+            <a class="archive-post-title" href="/2024/11/06/go_concurrency_collection/">Go并发合集</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/16</span>
+            <a class="archive-post-title" href="/2024/10/16/rabbitmq2-usage/">RabbitMQ2——使用</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/15</span>
+            <a class="archive-post-title" href="/2024/10/15/rabbitmq1-mq-introduction-and-installation/">RabbitMQ1——MQ简介和安装</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/10</span>
+            <a class="archive-post-title" href="/2024/10/10/go_sync_12_extended_concurrency_primitives/">Go并发12——扩展并发原语</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/10</span>
+            <a class="archive-post-title" href="/2024/10/10/go_sync_11_happens_before/">Go并发11—happens-before</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/30</span>
+            <a class="archive-post-title" href="/2024/09/30/go_sync_10_channel/">Go并发10—channel</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/27</span>
+            <a class="archive-post-title" href="/2024/09/27/go_sync_09_atomic/">Go并发9——atomic</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/24</span>
+            <a class="archive-post-title" href="/2024/09/24/go_sync_08_context/">Go并发8——Context</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/23</span>
+            <a class="archive-post-title" href="/2024/09/23/go_sync_07_pool/">Go并发7——Pool</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/21</span>
+            <a class="archive-post-title" href="/2024/09/21/go_sync_06_map/">Go并发6——Map</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/20</span>
+            <a class="archive-post-title" href="/2024/09/20/go_sync_05_once/">Go并发5——Once</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/19</span>
+            <a class="archive-post-title" href="/2024/09/19/go_sync_04_cond/">Go并发4——Cond</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/19</span>
+            <a class="archive-post-title" href="/2024/09/19/go_sync_03_waitgroup/">Go并发3——WaitGroup</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/17</span>
+            <a class="archive-post-title" href="/2024/09/17/go_sync_02_rwmutex/">Go并发2——RWMutex</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/16</span>
+            <a class="archive-post-title" href="/2024/09/16/go_sync_01_mutex_evolution/">Go并发1——Mutex及其进化史</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/15</span>
+            <a class="archive-post-title" href="/2024/09/15/docker_07_docker_networking/">Docker7——Docker网络</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/13</span>
+            <a class="archive-post-title" href="/2024/09/13/docker_06_dockerfile_and_instructions/">Docker6——Dockerfile及指令说明</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/13</span>
+            <a class="archive-post-title" href="/2024/09/13/go-map/">Go Map</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/12</span>
+            <a class="archive-post-title" href="/2024/09/12/docker_05_images/">Docker5——镜像</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/12</span>
+            <a class="archive-post-title" href="/2024/09/12/docker_04_deployment_trial/">Docker4——尝试部署</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/12</span>
+            <a class="archive-post-title" href="/2024/09/12/docker_02_installation_process/">Docker2——安装过程</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/12</span>
+            <a class="archive-post-title" href="/2024/09/12/docker_03_common_commands/">Docker3——Docker常用命令</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/07</span>
+            <a class="archive-post-title" href="/2024/09/07/go-zero/">go-zero</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/02</span>
+            <a class="archive-post-title" href="/2024/09/02/docker_01_virtualization_and_history/">Docker学习1——虚拟化及docker的发展史</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/22</span>
+            <a class="archive-post-title" href="/2024/08/22/understanding-mysql-transactions/">MySQL 事务详解</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/19</span>
+            <a class="archive-post-title" href="/2024/08/19/count_all_vs_count_column_differences/">COUNT(1)、COUNT(*)与COUNT(列名)区别？</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/19</span>
+            <a class="archive-post-title" href="/2024/08/19/mysql-like-query-optimization/">MySQL中like模糊查询如何优化？</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/19</span>
+            <a class="archive-post-title" href="/2024/08/19/mysql-why-index-use-b-plus-tree/">MySQL索引为什么是B+树？</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/17</span>
+            <a class="archive-post-title" href="/2024/08/17/how-is-a-SQL-query-executed/">基础架构：一条SQL查询语句是如何执行的？</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/16</span>
+            <a class="archive-post-title" href="/2024/08/16/go-arrays-and-slices/">Go 数组与切片</a>
+        </li>
+            </ul>
+    </div>
+</div>
+
+        <div class="sidebar-panel-tags">
+    <div class="sidebar-tags-name">
+            <span class="sidebar-tag-name" data-tags="docker">
+                <span class="iconfont-archer">&#xe606;</span>
+                docker
+            </span>
+            <span class="sidebar-tag-name" data-tags="mysql">
+                <span class="iconfont-archer">&#xe606;</span>
+                mysql
+            </span>
+    </div>
+    <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
+    <div class="tag-load-fail" style="display: none; color: #ccc; font-size: 0.6rem;">
+        缺失模块，请参考主题文档进行安装配置：https://github.com/fi3ework/hexo-theme-archer#%E5%AE%89%E8%A3%85%E4%B8%BB%E9%A2%98
+    </div> 
+    <div class="sidebar-tags-list"></div>
+</div>
+
+        <div class="sidebar-panel-categories">
+    <div class="sidebar-categories-name">
+    </div>
+    <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
+    <div class="sidebar-categories-list"></div>
+</div>
+
+    </div>
+</div>
+
+        <!-- site-meta -->
+        <script>
+    var siteMetaRoot = "/"
+    if (siteMetaRoot === "undefined") {
+        siteMetaRoot = '/'
+    }
+    var siteMeta = {
+        url: "https://miracleman575.github.io",
+        root: siteMetaRoot,
+        author: "Li"
+    }
+</script>
+
+        <!-- import experimental options here -->
+        <!-- Custom Font -->
+
+        <!-- main func -->
+        <script src="/scripts/main.js"></script>
+        <!-- fancybox -->
+        <script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.36/dist/fancybox/fancybox.umd.js" onload="window.Fancybox.bind('[data-fancybox]')" defer></script>
+        <!-- algolia -->
+        <!-- busuanzi -->
+            <script src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+        <!-- async load share.js -->
+            <script src="/scripts/share.js" async></script>
+        <!-- mermaid -->
+    </body>
+</html>

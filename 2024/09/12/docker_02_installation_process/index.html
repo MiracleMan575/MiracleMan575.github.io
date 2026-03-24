@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <!-- title -->
+<!-- keywords -->
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="author" content="Li">
+    <meta name="renderer" content="webkit">
+    <meta name="copyright" content="Li">
+        <meta name="keywords" content="hexo,hexo-theme,hexo-blog">
+    <meta name="description" content="">
+    <meta name="description" content="1 安装环境简介因为阿里云服务器已经服役于本网站，对于本次安装使用VMware Workstation Pro 17的虚拟机，宿主机为win11专业版，虚拟机环境为Ubuntu 24.04.1 LTS 。 2 关于虚拟机的安装因为时间有些久了，考虑到需要复健K8S，所以选择了Ubuntu 22.04 Jammy Jellyfish 桌面版（ https:&#x2F;&#x2F;ubuntu.com&#x2F;download&#x2F;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Docker2——安装过程">
+<meta property="og:url" content="https://miracleman575.github.io/2024/09/12/docker_02_installation_process/index.html">
+<meta property="og:site_name" content="code档案集">
+<meta property="og:description" content="1 安装环境简介因为阿里云服务器已经服役于本网站，对于本次安装使用VMware Workstation Pro 17的虚拟机，宿主机为win11专业版，虚拟机环境为Ubuntu 24.04.1 LTS 。 2 关于虚拟机的安装因为时间有些久了，考虑到需要复健K8S，所以选择了Ubuntu 22.04 Jammy Jellyfish 桌面版（ https:&#x2F;&#x2F;ubuntu.com&#x2F;download&#x2F;">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://miracleman575.github.io/2024/10/%E8%99%9A%E6%8B%9F%E7%BD%91%E7%BB%9C%E7%BC%96%E8%BE%91%E5%99%A8-1-1024x652.png">
+<meta property="og:image" content="https://miracleman575.github.io/2024/10/%E8%99%9A%E6%8B%9F%E7%BD%91%E7%BB%9C%E7%BC%96%E8%BE%91%E5%99%A83-1024x491.png">
+<meta property="og:image" content="https://miracleman575.github.io/2024/10/image-1024x613.png">
+<meta property="og:image" content="https://miracleman575.github.io/2024/10/image-1.png">
+<meta property="og:image" content="https://miracleman575.github.io/2024/10/image-3.png">
+<meta property="og:image" content="https://miracleman575.github.io/2024/10/image-4.png">
+<meta property="og:image" content="https://miracleman575.github.io/2024/10/image-5.png">
+<meta property="og:image" content="https://miracleman575.github.io/2024/10/image-6.png">
+<meta property="og:image" content="https://miracleman575.github.io/2024/10/image-7.png">
+<meta property="og:image" content="https://miracleman575.github.io/2024/10/image-8.png">
+<meta property="og:image" content="https://miracleman575.github.io/2024/10/image-9.png">
+<meta property="og:image" content="https://miracleman575.github.io/2024/10/image-10.png">
+<meta property="og:image" content="https://miracleman575.github.io/2024/10/image-11.png">
+<meta property="og:image" content="https://miracleman575.github.io/2024/10/image-12.png">
+<meta property="og:image" content="https://miracleman575.github.io/2024/10/image-13-1024x662.png">
+<meta property="og:image" content="https://miracleman575.github.io/2024/10/image-14.png">
+<meta property="og:image" content="https://miracleman575.github.io/2024/10/image-15.png">
+<meta property="og:image" content="https://miracleman575.github.io/2024/10/image-16.png">
+<meta property="og:image" content="https://miracleman575.github.io/2024/10/image-17.png">
+<meta property="og:image" content="https://miracleman575.github.io/2024/10/image-18.png">
+<meta property="og:image" content="https://miracleman575.github.io/2024/10/image-19.png">
+<meta property="og:image" content="https://miracleman575.github.io/2024/10/image-20.png">
+<meta property="og:image" content="https://miracleman575.github.io/2024/10/image-21.png">
+<meta property="article:published_time" content="2024-09-11T16:26:00.000Z">
+<meta property="article:modified_time" content="2026-03-24T12:41:48.863Z">
+<meta property="article:author" content="Li">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://miracleman575.github.io/2024/10/%E8%99%9A%E6%8B%9F%E7%BD%91%E7%BB%9C%E7%BC%96%E8%BE%91%E5%99%A8-1-1024x652.png">
+    <meta http-equiv="Cache-control" content="no-cache">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <link rel="icon" href="/assets/favicon.jpg">
+    <title>Docker2——安装过程 · Li&#39;s Blog</title>
+    <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
+/* This file is meant as a standalone workflow for
+- testing support for link[rel=preload]
+- enabling async CSS loading in browsers that do not support rel=preload
+- applying rel preload css once loaded, whether supported or not.
+*/ -->
+<script>
+    (function (w) {
+        'use strict'
+        // rel=preload support test
+        if (!w.loadCSS) {
+            w.loadCSS = function () {}
+        }
+        // define on the loadCSS obj
+        var rp = (loadCSS.relpreload = {})
+        // rel=preload feature support test
+        // runs once and returns a function for compat purposes
+        rp.support = (function () {
+            var ret
+            try {
+                ret = w.document.createElement('link').relList.supports('preload')
+            } catch (e) {
+                ret = false
+            }
+            return function () {
+                return ret
+            }
+        })()
+
+        // if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+        // then change that media back to its intended value on load
+        rp.bindMediaToggle = function (link) {
+            // remember existing media attr for ultimate state, or default to 'all'
+            var finalMedia = link.media || 'all'
+
+            function enableStylesheet() {
+                link.media = finalMedia
+            }
+
+            // bind load handlers to enable media
+            if (link.addEventListener) {
+                link.addEventListener('load', enableStylesheet)
+            } else if (link.attachEvent) {
+                link.attachEvent('onload', enableStylesheet)
+            }
+
+            // Set rel and non-applicable media type to start an async request
+            // note: timeout allows this to happen async to let rendering continue in IE
+            setTimeout(function () {
+                link.rel = 'stylesheet'
+                link.media = 'only x'
+            })
+            // also enable media after 3 seconds,
+            // which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+            setTimeout(enableStylesheet, 3000)
+        }
+
+        // loop through link elements in DOM
+        rp.poly = function () {
+            // double check this to prevent external calls from running
+            if (rp.support()) {
+                return
+            }
+            var links = w.document.getElementsByTagName('link')
+            for (var i = 0; i < links.length; i++) {
+                var link = links[i]
+                // qualify links to those with rel=preload and as=style attrs
+                if (
+                    link.rel === 'preload' &&
+                    link.getAttribute('as') === 'style' &&
+                    !link.getAttribute('data-loadcss')
+                ) {
+                    // prevent rerunning on link
+                    link.setAttribute('data-loadcss', true)
+                    // bind listeners to toggle media back
+                    rp.bindMediaToggle(link)
+                }
+            }
+        }
+
+        // if unsupported, run the polyfill
+        if (!rp.support()) {
+            // run once at least
+            rp.poly()
+
+            // rerun poly on an interval until onload
+            var run = w.setInterval(rp.poly, 500)
+            if (w.addEventListener) {
+                w.addEventListener('load', function () {
+                    rp.poly()
+                    w.clearInterval(run)
+                })
+            } else if (w.attachEvent) {
+                w.attachEvent('onload', function () {
+                    rp.poly()
+                    w.clearInterval(run)
+                })
+            }
+        }
+
+        // commonjs
+        if (typeof exports !== 'undefined') {
+            exports.loadCSS = loadCSS
+        } else {
+            w.loadCSS = loadCSS
+        }
+    })(typeof global !== 'undefined' ? global : this)
+</script>
+
+    <style type="text/css">
+    @font-face {
+        font-family: 'Oswald-Regular';
+        src: url("/font/Oswald-Regular.ttf");
+    }
+
+    body {
+        margin: 0;
+    }
+
+    header,
+    footer,
+    .footer-fixed-btn,
+    .sidebar,
+    .container,
+    .site-intro-meta,
+    .toc-wrapper {
+        display: none;
+    }
+
+    .site-intro {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        /* height: 50vh; */
+        overflow: hidden;
+    }
+
+    .site-intro-placeholder {
+        position: absolute;
+        z-index: -2;
+        top: 0;
+        left: 0;
+        width: calc(100% + 300px);
+        height: 100%;
+        background: repeating-linear-gradient(
+            -45deg,
+            #444 0,
+            #444 80px,
+            #333 80px,
+            #333 160px
+        );
+        background-position: center center;
+        transform: translate3d(-226px, 0, 0);
+        animation: gradient-move 2.5s ease-out 0s infinite;
+    }
+
+    @keyframes gradient-move {
+        0% {
+            transform: translate3d(-226px, 0, 0);
+        }
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+    }
+</style>
+
+    <link id="stylesheet-fancybox" rel="preload" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.36/dist/fancybox/fancybox.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link id="stylesheet-base" rel="preload" href="/css/style.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link id="stylesheet-mobile" rel="preload" href="/css/mobile.css" as="style" onload="this.onload=null;this.rel='stylesheet';this.media='screen and (max-width: 960px)'">
+    <link id="stylesheet-theme-dark" rel="preload" href="/css/dark.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" as="script">
+    <link rel="preload" href="/scripts/main.js" as="script">
+    <link rel="preload" href="/font/Oswald-Regular.ttf" as="font" crossorigin>
+    <link rel="preload" href="https://at.alicdn.com/t/font_327081_1dta1rlogw17zaor.woff" as="font" crossorigin>
+    <!-- algolia -->
+    <!-- 百度统计  -->
+    <!-- 谷歌统计  -->
+    <!-- Google tag (gtag.js) -->
+<meta name="generator" content="Hexo 8.1.1"></head>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script type="text/javascript">
+        if (typeof window.$ == undefined) {
+            console.warn('jquery load from jsdelivr failed, will load local script')
+            document.write('<script src="/lib/jquery.min.js" />')
+        }
+    </script>
+        <body class="post-body">
+        <!-- header -->
+        <header class="header header-mobile">
+    <!-- top read progress line -->
+    <div class="header-element">
+        <div class="read-progress"></div>
+    </div>
+    <!-- sidebar menu button -->
+    <div class="header-element">
+        <div class="header-sidebar-menu">
+            <div style="padding-left: 1px;">&#xe775;</div>
+        </div>
+    </div>
+    <!-- header actions -->
+    <div class="header-actions">
+        <!-- theme mode switch button -->
+        <span class="header-theme-btn header-element">
+            <i class="fas fa-adjust"></i>
+        </span>
+        <!-- back to home page text -->
+        <span class="home-link header-element">
+            <a href="/">Li's Blog</a>
+        </span>
+    </div>
+    <!-- toggle banner -->
+    <div class="banner">
+        <div class="blog-title header-element">
+            <a href="/">Li&#39;s Blog</a>
+        </div>
+        <div class="post-title header-element">
+            <a href="#" class="post-name">Docker2——安装过程</a>
+        </div>
+    </div>
+</header>
+
+        <!-- fixed footer -->
+        <footer class="footer-fixed">
+    <!-- donate button -->
+
+    <!-- back to top button -->
+    <div class="footer-fixed-btn footer-fixed-btn--hidden back-top">
+        <div>&#xe639;</div>
+    </div>
+</footer>
+
+        <!-- wrapper -->
+        <div class="wrapper">
+            <div class="site-intro" style="    height:50vh;
+">
+    <!-- 主页  -->
+    <!-- 404页  -->
+    <div class="site-intro-placeholder"></div>
+    <div class="site-intro-img" style="background-image: url(/intro/post-bg.jpg)"></div>
+    <div class="site-intro-meta">
+        <!-- 标题  -->
+        <h1 class="intro-title">
+            <!-- 主页  -->
+                Docker2——安装过程
+            <!-- 404 -->
+        </h1>
+        <!-- 副标题 -->
+        <p class="intro-subtitle">
+            <!-- 主页副标题  -->
+            <!-- 404 -->
+        </p>
+        <!-- 文章页 meta -->
+            <div class="post-intros">
+                <!-- 文章页标签  -->
+                    <div class="post-intro-tags" >
+</div>
+
+                <!-- 文章字数统计 -->
+                <div class="post-intro-meta">
+                    <!-- 撰写日期 -->
+                    <span class="iconfont-archer post-intro-calander">&#xe676;</span>
+                    <span class="post-intro-time">2024/09/12</span>
+                    <!-- busuanzi -->
+                        <span id="busuanzi_container_page_pv" class="busuanzi-pv">
+                            <span class="iconfont-archer post-intro-busuanzi">&#xe602;</span>
+                            <span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    <!-- 文章分享 -->
+                    <span class="share-wrapper">
+                        <span class="iconfont-archer share-icon">&#xe71d;</span>
+                        <span class="share-text">Share</span>
+                        <ul class="share-list">
+                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                                <div class="share-qrcode"></div>
+                            </li>
+                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
+    </div>
+</div>
+
+            <script>
+  // get user agent
+  function getBrowserVersions() {
+    var u = window.navigator.userAgent
+    return {
+      userAgent: u,
+      trident: u.indexOf('Trident') > -1, //IE内核
+      presto: u.indexOf('Presto') > -1, //opera内核
+      webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+      gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+      mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+      ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+      android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+      iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, //是否为iPhone或者安卓QQ浏览器
+      iPad: u.indexOf('iPad') > -1, //是否为iPad
+      webApp: u.indexOf('Safari') == -1, //是否为web应用程序，没有头部与底部
+      weixin: u.indexOf('MicroMessenger') == -1, //是否为微信浏览器
+      uc: u.indexOf('UCBrowser') > -1, //是否为android下的UC浏览器
+    }
+  }
+  var browser = {
+    versions: getBrowserVersions(),
+  }
+  console.log('userAgent: ' + browser.versions.userAgent)
+
+  // callback
+  function fontLoaded() {
+    console.log('font loaded')
+    if (document.getElementsByClassName('site-intro-meta')) {
+      document
+        .getElementsByClassName('intro-title')[0]
+        .classList.add('intro-fade-in')
+      document
+        .getElementsByClassName('intro-subtitle')[0]
+        .classList.add('intro-fade-in')
+      var postIntros = document.getElementsByClassName('post-intros')[0]
+      if (postIntros) {
+        postIntros.classList.add('post-fade-in')
+      }
+    }
+  }
+
+  // UC不支持跨域，所以直接显示
+  function asyncCb() {
+    if (browser.versions.uc) {
+      console.log('UCBrowser')
+      fontLoaded()
+    } else {
+      WebFont.load({
+        custom: {
+          families: ['Oswald-Regular'],
+        },
+        loading: function () {
+          // 所有字体开始加载
+          // console.log('font loading');
+        },
+        active: function () {
+          // 所有字体已渲染
+          fontLoaded()
+        },
+        inactive: function () {
+          // 字体预加载失败，无效字体或浏览器不支持加载
+          console.log('inactive: timeout')
+          fontLoaded()
+        },
+        timeout: 5000, // Set the timeout to two seconds
+      })
+    }
+  }
+
+  function asyncErr() {
+    console.warn('script load from CDN failed, will load local script')
+  }
+
+  // load webfont-loader async, and add callback function
+  function async(u, cb, err) {
+    var d = document,
+      t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0]
+    o.src = u
+    if (cb) {
+      o.addEventListener(
+        'load',
+        function (e) {
+          cb(null, e)
+        },
+        false
+      )
+    }
+    if (err) {
+      o.addEventListener(
+        'error',
+        function (e) {
+          err(null, e)
+        },
+        false
+      )
+    }
+    s.parentNode.insertBefore(o, s)
+  }
+
+  var asyncLoadWithFallBack = function (arr, success, reject) {
+    var currReject = function () {
+      reject()
+      arr.shift()
+      if (arr.length) async(arr[0], success, currReject)
+    }
+
+    async(arr[0], success, currReject)
+  }
+
+  asyncLoadWithFallBack(
+    [
+      'https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js',
+      'https://cdn.bootcss.com/webfont/1.6.28/webfontloader.js',
+      "/lib/webfontloader.min.js",
+    ],
+    asyncCb,
+    asyncErr
+  )
+</script>
+
+            <img class="loading" src="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" alt="loading">
+            <div class="container container-unloaded">
+                <main class="main post-page">
+    <article class="article-entry">
+        <h1 id="1-安装环境简介"><a href="#1-安装环境简介" class="headerlink" title="1 安装环境简介"></a>1 安装环境简介</h1><p>因为阿里云服务器已经服役于本网站，对于本次安装使用VMware Workstation Pro 17的虚拟机，宿主机为win11专业版，虚拟机环境为Ubuntu 24.04.1 LTS 。</p>
+<h1 id="2-关于虚拟机的安装"><a href="#2-关于虚拟机的安装" class="headerlink" title="2 关于虚拟机的安装"></a>2 关于虚拟机的安装</h1><p>因为时间有些久了，考虑到需要复健K8S，所以选择了Ubuntu 22.04 Jammy Jellyfish 桌面版（ <a target="_blank" rel="noopener" href="https://ubuntu.com/download/desktop">https://ubuntu.com/download/desktop</a>），它有足够新的特性，非常适合运行Kubernetes，而内置的浏览器、终端等工具也很方便我们的调试和测试。</p>
+<p>我使用了win11作为宿主机，但对Apple M1用户来说，有一个不太好的消息，Ubuntu 22.04在内核由5.13升级到5.15的时候引入了一个小Bug，导致VMWare Fusion无法正常安装启动，这个问题直到4月份的正式版发布还没有解决。</p>
+<h4 id="虚拟机网络设置"><a href="#虚拟机网络设置" class="headerlink" title="虚拟机网络设置"></a>虚拟机网络设置</h4><p>点击”编辑“，点击”虚拟网络编辑器“，点击”虚拟网络编辑器“中的”更改设置“。</p>
+<p><img src="/2024/10/%E8%99%9A%E6%8B%9F%E7%BD%91%E7%BB%9C%E7%BC%96%E8%BE%91%E5%99%A8-1-1024x652.png"></p>
+<p>这里有三种模式，分别是桥接模式、仅主机模式、NAT模式。</p>
+<ul>
+<li>桥接模式：虚拟机的虚拟网络适配器与主机的物理网络适配器进行交接，虚拟机中的虚拟网络适配器可通过主机中的物理网络适配器直接访问到外部网络。</li>
+<li>NAT模式： NAT 模式也是 VMware 创建虚拟机的默认网络连接模式 。使用NAT模式网络连接时，VMware会在主机上建立单独的专用网络，用以在主机和虚拟机之间相互通信。</li>
+<li>主机模式：比 NAT 模式更加封闭的的网络连接模式，它将创建完全包含在主机中的专用网络。</li>
+</ul>
+<p><img src="/2024/10/%E8%99%9A%E6%8B%9F%E7%BD%91%E7%BB%9C%E7%BC%96%E8%BE%91%E5%99%A83-1024x491.png"></p>
+<p>点击NAT设置，记下”子网IP“、”子网掩码“和”网关IP“，此处后续需要使用。</p>
+<h4 id="新建虚拟机"><a href="#新建虚拟机" class="headerlink" title="新建虚拟机"></a>新建虚拟机</h4><p><img src="/2024/10/image-1024x613.png"></p>
+<p>点击”文件“，选择”新建虚拟机“，在弹出的”新建虚拟机向导“，选择”经典“，选择”下一步“。</p>
+<p><img src="/2024/10/image-1.png"></p>
+<p>选择安装程序光盘映像文件，选中下载的unbuntu，点击”下一步“。</p>
+<p><img src="/2024/10/image-3.png"></p>
+<p>输入对应的信息，这里我输入的用户名li，密码是123456</p>
+<p><img src="/2024/10/image-4.png"></p>
+<p>修改虚拟机名称，选择存放位置，点击”下一步“。</p>
+<p><img src="/2024/10/image-5.png"></p>
+<p>这边我将最大磁盘大小调整到了40GB，也是考虑后续安装K8S，点击”下一步“。</p>
+<p><img src="/2024/10/image-6.png"></p>
+<p>这里选择”自定义硬件“。</p>
+<p><img src="/2024/10/image-7.png"></p>
+<p>在网络设备器选择”桥接模式“，这里如果选择NAT模式时，虚拟机创建后无法连接网络，可能会导致虚拟机开启后设置后因为无法连接网络无法启动或者登录卡住的问题。（这是我遇到的一个问题，修改后解决了）。</p>
+<p><img src="/2024/10/image-8.png"></p>
+<p>因为我用不到蓝牙和声卡，我就都关闭了。</p>
+<p><img src="/2024/10/image-9.png"></p>
+<p>在”显示器“设置中，关闭”加速3D图形“，开启时有可能导致虚拟机卡顿甚至黑屏。</p>
+<p><img src="/2024/10/image-10.png"></p>
+<p>最后点击完成。</p>
+<p><img src="/2024/10/image-11.png"></p>
+<p>出现上述提示时去虚拟机设置高级中关闭即可，未关闭可能会导致虚拟机卡顿甚至黑屏。</p>
+<p>进入虚拟机后点击设置中的网络，将有限网络修改为手动，掩码、网关设置为NAT中对应设置，IP设置为该网段即可，比如我设置为了192.168.239.130。</p>
+<p><img src="/2024/10/image-12.png"><img src="/2024/10/image-13-1024x662.png"></p>
+<p>此时修改虚拟机设置，将网络切换为NAT，ping下百度等保证通畅。</p>
+<p>到此我们虚拟机网络就设置好了！</p>
+<h1 id="3-安装方便操作的软件并使用ssh连接虚拟机"><a href="#3-安装方便操作的软件并使用ssh连接虚拟机" class="headerlink" title="3 安装方便操作的软件并使用ssh连接虚拟机"></a>3 安装方便操作的软件并使用ssh连接虚拟机</h1><p>接下来我们将在虚拟机安装一些用于操作的软件。</p>
+<h4 id="安装ssh，修改密码设置"><a href="#安装ssh，修改密码设置" class="headerlink" title="安装ssh，修改密码设置"></a>安装ssh，修改密码设置</h4><p>快捷键ctrl+shift+T呼出终端，我们先修改一下root密码，并且切换到root用户</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo passwd root</span><br></pre></td></tr></table></figure>
+
+<p>按照要求依次输入当前用户密码，root密码，确认root密码即可。接下来我们使用下述切换至root用户并且安装ssh。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"># 切换到root用户</span><br><span class="line">su root</span><br><span class="line"># 更新包列表</span><br><span class="line">sudo apt update</span><br><span class="line"># 安装OpenSSH服务器软件包</span><br><span class="line">sudo apt install openssh-server</span><br><span class="line"># 检查SSH服务的状态</span><br><span class="line">sudo systemctl status ssh</span><br><span class="line"># 如果SSH服务没有启动</span><br><span class="line">sudo systemctl start ssh</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/10/image-14.png"></p>
+<p>上图为ssh正常启动，因为习惯使用vim，unbuntu老用户仍旧可以使用nano等，我使用”sudo apt install vim“安装了vim。</p>
+<p>在修改root用户密码时，我们可能会遇到如”密码未通过字典检查 - 过于简单化&#x2F;系统化“报错。因为是虚拟机，我们便于登录管理修改等，这里可以去修改一下设置。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo vim /etc/pam.d/common-password</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/10/image-15.png"></p>
+<p>基于 DEB 的操作系统中，密码和身份认证相关的配置文件被存储在 <code>/etc/pam.d/</code> 目录中，我添加了 <code>minlen=6</code> 由此设置了密码最小长度为6，随后我将root密码修改为123456。</p>
+<h4 id="使用ssh登录机器"><a href="#使用ssh登录机器" class="headerlink" title="使用ssh登录机器"></a>使用ssh登录机器</h4><p>可以使用类似xshell、MobaXterm等软件ssh登录到虚拟机了！</p>
+<p><img src="/2024/10/image-16.png"></p>
+<p>这里我使用了MobaXterm，点击会话，输入虚拟机设置时的ip，输入指定用户进行点击确定。随后可以直接连接时会要求输入密码。</p>
+<p>有些朋友可能疑惑这里为什么不适用root直接登录，ssh默认是未开启root登录的，修改可以通过 <code>sudo vim /etc/ssh/sshd_config</code> 在文件中写入或者放开 <code>PermitRootLogin yes</code> ，重启ssh服务，此后便可使用root登录啦。</p>
+<p><img src="/2024/10/image-17.png"></p>
+<p>看到下面的界面就证明成功啦！</p>
+<p><img src="/2024/10/image-18.png"></p>
+<h1 id="3-安装docker"><a href="#3-安装docker" class="headerlink" title="3 安装docker"></a>3 安装docker</h1><p>我们尝试在命令行中输入docker，会得到“命令未找到”的提示，还有如何安装的建议。</p>
+<p><img src="/2024/10/image-19.png"></p>
+<p>所以，你只需要按照系统的提示，“照葫芦画瓢”输入命令，安装 <code>docker.io</code> 就可以了。为了方便，你还可以使用 <code>-y</code> 参数来避免确认，实现自动化操作：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo apt install docker.io</span><br><span class="line">sudo apt install -y docker.io #安装Docker Engine</span><br></pre></td></tr></table></figure>
+
+<p>Docker Engine不像Docker Desktop那样可以安装后就直接使用，必须要做一些手工调整才能用起来，所以你还要在安装完毕后执行下面的两条命令：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo service docker start # 启动docker</span><br><span class="line">sudo usermod -aG docker $&#123;USER&#125;   #当前用户加入docker组</span><br></pre></td></tr></table></figure>
+
+<p>第一个 <code>service docker start</code> 是启动Docker的后台服务，第二个 <code>usermod -aG</code> 是把当前的用户加入Docker的用户组。这是因为操作Docker必须要有root权限，而直接使用root用户不够安全， <strong>加入Docker用户组是一个比较好的选择，这也是Docker官方推荐的做法</strong>。当然，如果只是为了图省事，你也可以直接切换到root用户来操作Docker。</p>
+<p>上面的三条命令执行完之后，我们还需要退出系统（命令 <code>exit</code> ），再重新登录一次，这样才能让修改用户组的命令 <code>usermod</code> 生效。</p>
+<p><strong>现在我们就可以来验证Docker是否安装成功了，使用的命令是 <code>docker version</code> 和 <code>docker info</code>。</strong></p>
+<p><code>docker version</code> 会输出Docker客户端和服务器各自的版本信息：</p>
+<p><img src="/2024/10/image-20.png"></p>
+<p><code>docker info</code> 会显示当前Docker系统相关的信息，例如CPU、内存、容器数量、镜像数量、容器运行时、存储文件系统等等</p>
+<p><img src="/2024/10/image-21.png"></p>
+<p>到此你就有了一个docker实验环境了！</p>
+
+    </article>
+    <!-- license -->
+        <div class="license-wrapper">
+            <p>原文作者：<a href="https://miracleman575.github.io">Li</a>
+            <p>原文链接：<a href="https://miracleman575.github.io/2024/09/12/docker_02_installation_process/">https://miracleman575.github.io/2024/09/12/docker_02_installation_process/</a>
+            <p>发表日期：<a href="https://miracleman575.github.io/2024/09/12/docker_02_installation_process/">September 12th 2024, 12:26:00 am</a>
+            <p>更新日期：<a href="https://miracleman575.github.io/2024/09/12/docker_02_installation_process/">March 24th 2026, 8:41:48 pm</a>
+            <p>版权声明：本文采用<a rel="license noopener" target="_blank" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
+        </div>
+    <!-- paginator -->
+    <ul class="post-paginator">
+        <li class="next">
+                <div class="nextSlogan">Next Post</div>
+                <a href="/2024/09/12/docker_03_common_commands/" title="Docker3——Docker常用命令">
+                    <div class="nextTitle">Docker3——Docker常用命令</div>
+                </a>
+        </li>
+        <li class="previous">
+                <div class="prevSlogan">Previous Post</div>
+                <a href="/2024/09/07/go-zero/" title="go-zero">
+                    <div class="prevTitle">go-zero</div>
+                </a>
+        </li>
+    </ul>
+    <!-- comment -->
+        <div class="post-comment">
+            <!-- 来必力 City 版安装代码 -->
+
+            
+            
+            
+            <!-- utteranc评论 -->
+
+            <!-- partial('_partial/comment/changyan') -->
+            <!--PC版-->
+
+            
+            
+            
+        </div>
+    <!-- timeliness note -->
+    <!-- idea from: https://hexo.fluid-dev.com/posts/hexo-injector/#%E6%96%87%E7%AB%A0%E6%97%B6%E6%95%88%E6%80%A7%E6%8F%90%E7%A4%BA -->
+    <!-- Mathjax -->
+</main>
+
+                <!-- profile -->
+            </div>
+            <footer class="footer footer-unloaded">
+    <!-- social  -->
+        <div class="social">
+                            <a href="mailto:miraclemhome@foxmail.com" class="iconfont-archer email" title="email" ></a>
+
+        </div>
+    <!-- powered by Hexo  -->
+    <div class="copyright">
+        <span id="hexo-power">Powered by <a href="https://hexo.io/" target="_blank">Hexo</a></span><span class="iconfont-archer power">&#xe635;</span><span id="theme-info">theme <a href="https://github.com/fi3ework/hexo-theme-archer" target="_blank">Archer</a></span>
+    </div>
+    <!-- website approve for Chinese user -->
+    <!-- 不蒜子  -->
+        <div class="busuanzi-container">
+                <span id="busuanzi_container_site_pv">PV: <span id="busuanzi_value_site_pv"></span> :)</span>
+        </div>
+</footer>
+
+        </div>
+        <!-- toc -->
+            <div class="toc-wrapper toc-wrapper-loding" style=    top:50vh;
+>
+                <div class="toc-catalog">
+                    <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+                </div>
+                <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1-%E5%AE%89%E8%A3%85%E7%8E%AF%E5%A2%83%E7%AE%80%E4%BB%8B"><span class="toc-number">1.</span> <span class="toc-text">1 安装环境简介</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-%E5%85%B3%E4%BA%8E%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%9A%84%E5%AE%89%E8%A3%85"><span class="toc-number">2.</span> <span class="toc-text">2 关于虚拟机的安装</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%BD%91%E7%BB%9C%E8%AE%BE%E7%BD%AE"><span class="toc-number">2.1.</span> <span class="toc-text">虚拟机网络设置</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%96%B0%E5%BB%BA%E8%99%9A%E6%8B%9F%E6%9C%BA"><span class="toc-number">2.2.</span> <span class="toc-text">新建虚拟机</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-%E5%AE%89%E8%A3%85%E6%96%B9%E4%BE%BF%E6%93%8D%E4%BD%9C%E7%9A%84%E8%BD%AF%E4%BB%B6%E5%B9%B6%E4%BD%BF%E7%94%A8ssh%E8%BF%9E%E6%8E%A5%E8%99%9A%E6%8B%9F%E6%9C%BA"><span class="toc-number">3.</span> <span class="toc-text">3 安装方便操作的软件并使用ssh连接虚拟机</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AE%89%E8%A3%85ssh%EF%BC%8C%E4%BF%AE%E6%94%B9%E5%AF%86%E7%A0%81%E8%AE%BE%E7%BD%AE"><span class="toc-number">3.1.</span> <span class="toc-text">安装ssh，修改密码设置</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8ssh%E7%99%BB%E5%BD%95%E6%9C%BA%E5%99%A8"><span class="toc-number">3.2.</span> <span class="toc-text">使用ssh登录机器</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-%E5%AE%89%E8%A3%85docker"><span class="toc-number">4.</span> <span class="toc-text">3 安装docker</span></a></li></ol>
+            </div>
+        <!-- sidebar -->
+        <div class="sidebar sidebar-hide">
+    <ul class="sidebar-tabs sidebar-tabs-active-0">
+        <li class="sidebar-tab-archives"><span class="iconfont-archer">&#xe67d;</span><span class="tab-name">Archive</span></li>
+        <li class="sidebar-tab-tags"><span class="iconfont-archer">&#xe61b;</span><span class="tab-name">Tag</span></li>
+        <li class="sidebar-tab-categories"><span class="iconfont-archer">&#xe666;</span><span class="tab-name">Cate</span></li>
+    </ul>
+    <div class="sidebar-content sidebar-content-show-archive">
+        <div class="sidebar-panel-archives">
+    <!-- 在 ejs 中将 archive 按照时间排序 -->
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    <div class="total-and-search">
+        <div class="total-archive">
+        Total : 33
+        </div>
+        <!-- search  -->
+    </div>
+    <div class="post-archive">
+            <div class="archive-year"> 2024 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/27</span>
+            <a class="archive-post-title" href="/2024/12/27/go_basics_summary_questions/">Go基础总结问题</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/26</span>
+            <a class="archive-post-title" href="/2024/12/26/redis/">redis</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/25</span>
+            <a class="archive-post-title" href="/2024/12/25/mysql/">Mysql</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/06</span>
+            <a class="archive-post-title" href="/2024/11/06/go_concurrency_collection/">Go并发合集</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/16</span>
+            <a class="archive-post-title" href="/2024/10/16/rabbitmq2-usage/">RabbitMQ2——使用</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/15</span>
+            <a class="archive-post-title" href="/2024/10/15/rabbitmq1-mq-introduction-and-installation/">RabbitMQ1——MQ简介和安装</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/10</span>
+            <a class="archive-post-title" href="/2024/10/10/go_sync_12_extended_concurrency_primitives/">Go并发12——扩展并发原语</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/10</span>
+            <a class="archive-post-title" href="/2024/10/10/go_sync_11_happens_before/">Go并发11—happens-before</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/30</span>
+            <a class="archive-post-title" href="/2024/09/30/go_sync_10_channel/">Go并发10—channel</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/27</span>
+            <a class="archive-post-title" href="/2024/09/27/go_sync_09_atomic/">Go并发9——atomic</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/24</span>
+            <a class="archive-post-title" href="/2024/09/24/go_sync_08_context/">Go并发8——Context</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/23</span>
+            <a class="archive-post-title" href="/2024/09/23/go_sync_07_pool/">Go并发7——Pool</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/21</span>
+            <a class="archive-post-title" href="/2024/09/21/go_sync_06_map/">Go并发6——Map</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/20</span>
+            <a class="archive-post-title" href="/2024/09/20/go_sync_05_once/">Go并发5——Once</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/19</span>
+            <a class="archive-post-title" href="/2024/09/19/go_sync_04_cond/">Go并发4——Cond</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/19</span>
+            <a class="archive-post-title" href="/2024/09/19/go_sync_03_waitgroup/">Go并发3——WaitGroup</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/17</span>
+            <a class="archive-post-title" href="/2024/09/17/go_sync_02_rwmutex/">Go并发2——RWMutex</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/16</span>
+            <a class="archive-post-title" href="/2024/09/16/go_sync_01_mutex_evolution/">Go并发1——Mutex及其进化史</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/15</span>
+            <a class="archive-post-title" href="/2024/09/15/docker_07_docker_networking/">Docker7——Docker网络</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/13</span>
+            <a class="archive-post-title" href="/2024/09/13/docker_06_dockerfile_and_instructions/">Docker6——Dockerfile及指令说明</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/13</span>
+            <a class="archive-post-title" href="/2024/09/13/go-map/">Go Map</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/12</span>
+            <a class="archive-post-title" href="/2024/09/12/docker_05_images/">Docker5——镜像</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/12</span>
+            <a class="archive-post-title" href="/2024/09/12/docker_04_deployment_trial/">Docker4——尝试部署</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/12</span>
+            <a class="archive-post-title" href="/2024/09/12/docker_02_installation_process/">Docker2——安装过程</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/12</span>
+            <a class="archive-post-title" href="/2024/09/12/docker_03_common_commands/">Docker3——Docker常用命令</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/07</span>
+            <a class="archive-post-title" href="/2024/09/07/go-zero/">go-zero</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/02</span>
+            <a class="archive-post-title" href="/2024/09/02/docker_01_virtualization_and_history/">Docker学习1——虚拟化及docker的发展史</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/22</span>
+            <a class="archive-post-title" href="/2024/08/22/understanding-mysql-transactions/">MySQL 事务详解</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/19</span>
+            <a class="archive-post-title" href="/2024/08/19/count_all_vs_count_column_differences/">COUNT(1)、COUNT(*)与COUNT(列名)区别？</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/19</span>
+            <a class="archive-post-title" href="/2024/08/19/mysql-like-query-optimization/">MySQL中like模糊查询如何优化？</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/19</span>
+            <a class="archive-post-title" href="/2024/08/19/mysql-why-index-use-b-plus-tree/">MySQL索引为什么是B+树？</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/17</span>
+            <a class="archive-post-title" href="/2024/08/17/how-is-a-SQL-query-executed/">基础架构：一条SQL查询语句是如何执行的？</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/16</span>
+            <a class="archive-post-title" href="/2024/08/16/go-arrays-and-slices/">Go 数组与切片</a>
+        </li>
+            </ul>
+    </div>
+</div>
+
+        <div class="sidebar-panel-tags">
+    <div class="sidebar-tags-name">
+            <span class="sidebar-tag-name" data-tags="docker">
+                <span class="iconfont-archer">&#xe606;</span>
+                docker
+            </span>
+            <span class="sidebar-tag-name" data-tags="mysql">
+                <span class="iconfont-archer">&#xe606;</span>
+                mysql
+            </span>
+    </div>
+    <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
+    <div class="tag-load-fail" style="display: none; color: #ccc; font-size: 0.6rem;">
+        缺失模块，请参考主题文档进行安装配置：https://github.com/fi3ework/hexo-theme-archer#%E5%AE%89%E8%A3%85%E4%B8%BB%E9%A2%98
+    </div> 
+    <div class="sidebar-tags-list"></div>
+</div>
+
+        <div class="sidebar-panel-categories">
+    <div class="sidebar-categories-name">
+    </div>
+    <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
+    <div class="sidebar-categories-list"></div>
+</div>
+
+    </div>
+</div>
+
+        <!-- site-meta -->
+        <script>
+    var siteMetaRoot = "/"
+    if (siteMetaRoot === "undefined") {
+        siteMetaRoot = '/'
+    }
+    var siteMeta = {
+        url: "https://miracleman575.github.io",
+        root: siteMetaRoot,
+        author: "Li"
+    }
+</script>
+
+        <!-- import experimental options here -->
+        <!-- Custom Font -->
+
+        <!-- main func -->
+        <script src="/scripts/main.js"></script>
+        <!-- fancybox -->
+        <script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.36/dist/fancybox/fancybox.umd.js" onload="window.Fancybox.bind('[data-fancybox]')" defer></script>
+        <!-- algolia -->
+        <!-- busuanzi -->
+            <script src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+        <!-- async load share.js -->
+            <script src="/scripts/share.js" async></script>
+        <!-- mermaid -->
+    </body>
+</html>
